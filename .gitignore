@@ -1,0 +1,45 @@
+#########################
+#### GENERAL or ROOT ####
+#########################
+# Scratch
+sauv/
+libs/
+trace.txt
+
+# Maven
+target/
+
+# Eclipse
+.classpath
+.project
+.settings/
+*.iml
+*.pyc
+*.orig
+pre-commit-changes.txt
+
+# Emacs temp files
+~*
+*~
+
+#SVN
+.svn
+*.svn-base
+*#
+
+.idea
+.AppleDouble/
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+#vim files
+.*.sw?
+.*~
