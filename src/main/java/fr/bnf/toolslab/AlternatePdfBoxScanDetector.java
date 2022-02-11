@@ -23,6 +23,7 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 	FileDescriptor fd;
 	int nbPages;
 	int nbImages;
+	int nbImagesInPage;
 	List<DimensionInfo> pageDimensions;
 	List<DimensionInfo> imageDimensions;
 
@@ -44,8 +45,9 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 			fd.setNbPages(nbPages);
 			for (PDPage page : document.getPages()) {
 				this.nbPages++;
-				this.nbImages += parsePage(page);
+				this.nbImages += parsePage(page, this.nbPages);
 			}
+			fd.setNbPages(this.nbPages);
 			fd.setNbImages(this.nbImages);
 			LOGGER.fine("First pass in "
 					+ (System.currentTimeMillis() - beginTime));
@@ -62,32 +64,36 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 			// all the page
 			int nbSamples = Math.min(nbPages, MAX_SAMPLES);
 			List<Integer> pagesToTest = pickSamples(nbSamples, nbPages);
-			int nbScanPages = 0;
-			int scanDpi = 0;
+
+			// Classify all the dpiFound (could be 0)
+			DpiCounter counter = new DpiCounter();
+
 			for (int pageNum : pagesToTest) {
 				DimensionInfo dimPage = pageDimensions.get(pageNum);
 				DimensionInfo dimImage = imageDimensions.get(pageNum);
+				LOGGER.fine("Page [" + pageNum + "] dimension " + dimImage);
 				if (dimImage == DimensionInfo.EMPTY) {
 					continue;
 				}
 
 				int dpiFound = findDensity(dimImage, dimPage, 1.0f);
+				LOGGER.fine("Page [" + pageNum + "] density " + dpiFound);
+
 				if (dpiFound != 0) {
-					// If the resolution found is too different from the
-					// previous resolution, ignore the page
-					if (scanDpi != 0 && Math.abs(scanDpi - dpiFound) > 10) {
-						continue;
-					}
-					scanDpi = dpiFound;
-					nbScanPages++;
+					counter.increment(dpiFound);
 				}
 			}
+			// Find the most usual dpi
+			Entry<Integer, Integer> bestDpi = counter.getBest();
 			LOGGER.fine("Second pass in "
 					+ (System.currentTimeMillis() - beginTime));
+			if (bestDpi.getKey() == 0) {
+				return;
+			}
 			// If more scanned pages than the threshold
-			if (nbScanPages > nbSamples / THRESHOLD) {
+			if (bestDpi.getValue().intValue() > nbSamples / THRESHOLD) {
 				fd.setScan(true);
-				fd.setResolution(scanDpi);
+				fd.setResolution(bestDpi.getKey());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -98,7 +104,8 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 		}
 	}
 
-	protected int parsePage(PDPage page) throws IOException {
+	protected int parsePage(PDPage page, int numPage) throws IOException {
+		nbImagesInPage = 0;
 		PDRectangle rect = page.getMediaBox(); // Found page dimension
 		// MediaBox specified in "default user space units", which is points
 		// (i.e. 72 dpi)
@@ -106,45 +113,75 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 
 		DimensionInfo dimPage = new DimensionInfo((long) (rect.getWidth()),
 				(long) (rect.getHeight()));
-		LOGGER.fine("Found page dimension " + dimPage.toString(""));
+		LOGGER.fine("Found page [" + numPage + "] with dimension "
+				+ dimPage.toString());
 		pageDimensions.add(dimPage);
 
 		PDResources resources = page.getResources();
-		int nbImagesInPage = 0;
 		COSDictionary resc = resources.getCOSObject();
+
+		recurseLookForImage(resc, numPage == 2);
+
+		return nbImagesInPage;
+	}
+
+	protected void recurseLookForImage(COSDictionary resc, boolean debug)
+			throws IOException {
 		COSDictionary dict = (COSDictionary) resc
 				.getDictionaryObject(COSName.XOBJECT);
 		if (dict == null) {
 			// No image
-			imageDimensions.add(DimensionInfo.EMPTY);
-			return 0;
+			if (debug) {
+				LOGGER.fine("No XOBJECT dictionnary");
+			}
+			return;
 		}
+
 		for (Entry<COSName, COSBase> e : dict.entrySet()) {
-			LOGGER.fine("Looking for entry " + e.getKey());
+			if (debug) {
+				LOGGER.fine("Looking for entry key=" + e.getKey());
+			}
 			COSBase value = e.getValue();
+			if (debug) {
+				LOGGER.fine("Looking for entry value=" + value + ", class="
+						+ value.getClass());
+			}
 			if (value == null) {
 				continue;
 			} else if (value instanceof COSObject) {
 				value = ((COSObject) value).getObject();
 			}
+			if (debug) {
+				LOGGER.fine("Looking for object=" + value + ", class="
+						+ value.getClass());
+			}
 			if (!(value instanceof COSStream)) {
 				continue;
 			}
 			try (COSStream stream = (COSStream) value) {
-				if (COSName.IMAGE.equals(stream.getCOSName(COSName.SUBTYPE))) {
+				COSName subtype = stream.getCOSName(COSName.SUBTYPE);
+				if (COSName.IMAGE.equals(subtype)) {
 					Long width = stream.getLong(COSName.WIDTH);
 					Long height = stream.getLong(COSName.HEIGHT);
 					DimensionInfo dimImage = new DimensionInfo(width, height);
-					LOGGER.fine("Found image " + e.getKey()
-							+ " with dimension " + dimImage.toString());
-					if (nbImages == 0) {
-						// Only record the first one
+					if (debug)
+						LOGGER.fine("Found image " + e.getKey()
+								+ " with dimension " + dimImage.toString());
+					if (nbImagesInPage == 0) {
+						// Only record the first dimension in a page
 						imageDimensions.add(dimImage);
 					}
 					nbImagesInPage++;
+				} else if (COSName.FORM.equals(subtype)) {
+					// Look for a image in the resources
+					COSDictionary streamResc = (COSDictionary) stream
+							.getCOSDictionary(COSName.RESOURCES);
+					if (streamResc != null) {
+						recurseLookForImage(streamResc, debug);
+					}
 				}
 			}
 		}
-		return nbImagesInPage;
 	}
+
 }

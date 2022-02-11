@@ -23,10 +23,6 @@ public class DimensionInfo {
 	}
 
 	public String toString() {
-		return toString("Dimension");
-	}
-
-	public String toString(String attr) {
 		return "[" + x + 'x' + y + ']';
 	}
 }

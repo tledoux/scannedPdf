@@ -38,6 +38,8 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 			fd.setNbImages(nbImages);
 			LOGGER.fine("First pass in "
 					+ (System.currentTimeMillis() - beginTime));
+			LOGGER.fine("Find " + nbPages + " pages and " + nbImages
+					+ " images");
 			if (nbPages != nbImages) {
 				fd.setScan(false);
 				return;
@@ -47,30 +49,29 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 			// all the page
 			int nbSamples = Math.min(nbPages, MAX_SAMPLES);
 			List<Integer> pagesToTest = pickSamples(nbSamples, nbPages);
-
-			int nbScanPages = 0;
-			int scanDpi = 0;
+			DpiCounter counter = new DpiCounter();
 			for (int pageNum : pagesToTest) {
 				PDPage page = document.getPage(pageNum);
 				int dpiFound = isScanPage(page);
 				if (dpiFound != 0) {
-					if (scanDpi != 0 && Math.abs(scanDpi - dpiFound) > 10) {
-						continue;
-					}
-					scanDpi = dpiFound;
-					nbScanPages++;
-				} else {
-					// No dpi detected, ignore the page
+					counter.increment(dpiFound);
 				}
 			}
 			LOGGER.fine("Second pass in "
 					+ (System.currentTimeMillis() - beginTime));
 			// If more scanned pages than the threshold
-			if (nbScanPages > nbSamples / THRESHOLD) {
-				fd.setScan(true);
-				fd.setResolution(scanDpi);
+			// Find the most usual dpi
+			Entry<Integer, Integer> bestDpi = counter.getBest();
+			LOGGER.fine("Second pass in "
+					+ (System.currentTimeMillis() - beginTime));
+			if (bestDpi.getKey() == 0) {
+				return;
 			}
-
+			// If more scanned pages than the threshold
+			if (bestDpi.getValue().intValue() > nbSamples / THRESHOLD) {
+				fd.setScan(true);
+				fd.setResolution(bestDpi.getKey());
+			}
 		} catch (IOException e) {
 			fd.setValid(false);
 			throw e;
@@ -81,9 +82,15 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 
 	int countImages(PDDocument document) {
 		int nbImages = 0;
+		int numPage = 0;
 		for (PDPage page : document.getPages()) {
+			numPage++;
 			PDResources resources = page.getResources();
+			// TODO Should recurse to find the images in FORM
 			for (COSName name : resources.getXObjectNames()) {
+				if (numPage == 1) {
+					LOGGER.fine("COSName = " + name);
+				}
 				if (resources.isImageXObject(name)) {
 					nbImages++;
 				}
@@ -105,7 +112,7 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 
 		DimensionInfo dimPage = new DimensionInfo((long) rect.getWidth(),
 				(long) rect.getHeight());
-		LOGGER.fine("Found page dimension " + dimPage.toString(""));
+		LOGGER.fine("Found page dimension " + dimPage.toString());
 
 		// Enumerate the resources to avoid building a complete image
 		PDResources pdResources = page.getResources();
@@ -117,7 +124,7 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 			return 0;
 		}
 		for (Entry<COSName, COSBase> e : dict.entrySet()) {
-			LOGGER.fine("Looking for entry " + e.getKey());
+			// LOGGER.fine("Looking for entry " + e.getKey());
 			COSBase c = e.getValue();
 			if (c == null) {
 				continue;

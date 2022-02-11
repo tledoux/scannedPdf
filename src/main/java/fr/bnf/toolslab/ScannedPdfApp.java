@@ -16,14 +16,14 @@ public class ScannedPdfApp {
 	}
 
 	public static void main(String[] args) {
-		boolean alternate = false;
+		boolean useTrivial = false;
 		if (args.length < 1) {
 			usage();
 			return;
 		}
 		int index = 0;
-		if ("-alt".equals(args[0])) {
-			alternate = true;
+		if ("-bad".equals(args[0])) {
+			useTrivial = true;
 			index++;
 		}
 
@@ -34,9 +34,9 @@ public class ScannedPdfApp {
 			return;
 		}
 
-		AbstractScanDetector detector = new PdfBoxScanDetector();
-		if (alternate) {
-			detector = new AlternatePdfBoxScanDetector();
+		AbstractScanDetector detector = new AlternatePdfBoxScanDetector();
+		if (useTrivial) {
+			detector = new PdfBoxScanDetector();
 		}
 
 		if (fIn.isFile()) {

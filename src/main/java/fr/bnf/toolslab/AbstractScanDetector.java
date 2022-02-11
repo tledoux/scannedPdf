@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObject;
+
 public abstract class AbstractScanDetector {
 	protected static Logger LOGGER = Logger
 			.getLogger(AbstractScanDetector.class.getName());
@@ -16,6 +21,39 @@ public abstract class AbstractScanDetector {
 	abstract void init(FileDescriptor fd);
 
 	abstract void parse() throws IOException;
+
+	/**
+	 * Returns the resource with the given name and kind as an indirect object,
+	 * or null.
+	 * Method taken from org.apache.pdfbox.pdmodel.PDResources that are private !!!
+	 */
+	protected COSObject getIndirect(COSDictionary resources, COSName kind,
+			COSName name) {
+		COSDictionary dict = (COSDictionary) resources
+				.getDictionaryObject(kind);
+		if (dict == null) {
+			return null;
+		}
+		COSBase base = dict.getItem(name);
+		if (base instanceof COSObject) {
+			return (COSObject) base;
+		}
+		// not an indirect object. Resource may have been added at runtime.
+		return null;
+	}
+
+	/**
+	 * Returns the resource with the given name and kind, or null.
+	 * Method taken from org.apache.pdfbox.pdmodel.PDResources that are private !!!
+	 */
+	protected COSBase get(COSDictionary resources, COSName kind, COSName name) {
+		COSDictionary dict = (COSDictionary) resources
+				.getDictionaryObject(kind);
+		if (dict == null) {
+			return null;
+		}
+		return dict.getDictionaryObject(name);
+	}
 
 	/**
 	 * Select nbSamples pages in a random fashion
