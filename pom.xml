@@ -6,6 +6,24 @@
   <packaging>jar</packaging>
   <version>1.0</version>
   <name>scannedPdf</name>
+  <description>Little experiment to detect scanned vs native pdfs</description>
+  <url>https://github.com/tledoux/scannedPdf</url>
+  <issueManagement>
+    <url>https://github.com/tledoux/scannedPdf/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/tledoux/scannedPdf</url>
+    <connection>scm:git:git://github.com/tledoux/scannedPdf.git</connection>
+    <developerConnection>scm:git:git@github.com:tledoux/scannedPdf.git</developerConnection>
+  </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -24,7 +42,7 @@
     </dependency>
   </dependencies>
   <build>
-  <!-- Look for updates: mvn versions:display-plugin-updates -->
+    <!-- Look for updates: mvn versions:display-plugin-updates -->
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -98,4 +116,63 @@
       </plugin>
     </plugins>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.4</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.8</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>index</report>
+              <report>license</report>
+              <report>scm</report>
+              <report>issue-tracking</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.1.2</version>
+        <configuration>
+          <configLocation>google_checks.xml</configLocation>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>checkstyle</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.5</version>
+        <configuration>
+          <argLine>-Xmx256m</argLine>
+          <argLine>-XX:MaxPermSize=256m</argLine>
+          <timeout>240000</timeout>
+          <effort>Max</effort>
+          <threshold>Medium</threshold>
+          <failOnError>true</failOnError>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>findbugs</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

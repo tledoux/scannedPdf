@@ -1,28 +1,61 @@
 package fr.bnf.toolslab;
 
+/**
+ * Utility class to handle dimensions.
+ *
+ */
 public class DimensionInfo {
 
-	public static final DimensionInfo EMPTY = new DimensionInfo(0, 0);
-	
-	public long x;
-	public long y;
+  public static final DimensionInfo EMPTY = new DimensionInfo(0, 0);
 
-	public DimensionInfo(long x, long y) {
-		this.x = x;
-		this.y = y;
-	}
+  protected long width;
+  protected long height;
 
-	public boolean approximate(DimensionInfo dim2, double percent) {
-		double deltaX = 100.0 * Math.abs(this.x - dim2.x) / this.x;
-		double deltaY = 100.0 * Math.abs(this.y - dim2.y) / this.y;
-		return (deltaX <= percent) && (deltaY <= percent);
-	}
+  public DimensionInfo(long w, long h) {
+    this.width = w;
+    this.height = h;
+  }
 
-	public boolean contains(DimensionInfo dim2) {
-		return this.x >= dim2.x && this.y >= dim2.y;
-	}
+  /**
+   * Looks if two dimensions are almost equals (by the given percent).
+   * 
+   * @param otherDim the other dimension to compare with
+   * @param percent tolerance of approximation
+   * @return @true@ if dimensions almost equals
+   */
+  public boolean approximate(DimensionInfo otherDim, double percent) {
+    double deltaX = 100.0 * Math.abs(this.width - otherDim.width) / this.width;
+    double deltaY = 100.0 * Math.abs(this.height - otherDim.height) / this.height;
+    return (deltaX <= percent) && (deltaY <= percent);
+  }
 
-	public String toString() {
-		return "[" + x + 'x' + y + ']';
-	}
+  /**
+   * Looks if the give dimension is smaller.
+   * 
+   * @param otherDim the other dimension to compare with
+   * @return @true@ if the given dimension is contained in
+   */
+  public boolean contains(DimensionInfo otherDim) {
+    return this.width >= otherDim.width && this.height >= otherDim.height;
+  }
+
+  public String toString() {
+    return String.format("[%dx%d]", width, height);
+  }
+
+  public long getX() {
+    return width;
+  }
+
+  public long getY() {
+    return height;
+  }
+
+  public long getWidth() {
+    return width;
+  }
+
+  public long getHeight() {
+    return height;
+  }
 }

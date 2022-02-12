@@ -1,151 +1,183 @@
 package fr.bnf.toolslab;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileDescriptor {
-	protected static final String SEP = ";";
+  protected static final String SEP = ";";
 
-	File file;
-	boolean isValid;
-	int nbPages;
-	int nbImages;
+  File file;
+  boolean isValid;
+  int nbPages;
+  int nbImages;
 
-	boolean isScan;
-	int resolution;
+  boolean isScan;
+  int resolution;
 
-	long timeToProcess;
+  long timeToProcess;
 
-	public FileDescriptor(File f) {
-		this.file = f;
-	}
+  public FileDescriptor(File f) {
+    this.file = f;
+  }
 
-	/**
-	 * @return the file
-	 */
-	public File getFile() {
-		return file;
-	}
+  /**
+   * Getter for the file.
+   *
+   * @return the file
+   */
+  public File getFile() {
+    return file;
+  }
 
-	/**
-	 * @param file
-	 *            the file to set
-	 */
-	public void setFile(File file) {
-		this.file = file;
-	}
+  /**
+   * Setter for the file.
+   *
+   * @param file the file to set
+   */
+  public void setFile(File file) {
+    this.file = file;
+  }
 
-	/**
-	 * @return the isValid
-	 */
-	public boolean isValid() {
-		return isValid;
-	}
+  /**
+   * Boolean to know if the file is valid.
+   * @return isValid validity of the file
+   */
+  public boolean isValid() {
+    return isValid;
+  }
 
-	/**
-	 * @param isValid
-	 *            the isValid to set
-	 */
-	public void setValid(boolean isValid) {
-		this.isValid = isValid;
-	}
+  /**
+   * Setter for the validity of the file.
+   * 
+   * @param isValid boolean to set
+   */
+  public void setValid(boolean isValid) {
+    this.isValid = isValid;
+  }
 
-	/**
-	 * @return the nbPages
-	 */
-	public int getNbPages() {
-		return nbPages;
-	}
+  /**
+   * Getter for the number of pages.
+   *
+   * @return page counter
+   */
+  public int getNbPages() {
+    return nbPages;
+  }
 
-	/**
-	 * @param nbPages
-	 *            the nbPages to set
-	 */
-	public void setNbPages(int nbPages) {
-		this.nbPages = nbPages;
-	}
+  /**
+   * Setter for the number of pages.
+   * 
+   * @param nbPages page counter
+   */
+  public void setNbPages(int nbPages) {
+    this.nbPages = nbPages;
+  }
 
-	/**
-	 * @return the nbImages
-	 */
-	public int getNbImages() {
-		return nbImages;
-	}
+  /**
+   * Getter for the number of images.
+   *
+   * @return image counter
+   */
+  public int getNbImages() {
+    return nbImages;
+  }
 
-	/**
-	 * @param nbImages
-	 *            the nbImages to set
-	 */
-	public void setNbImages(int nbImages) {
-		this.nbImages = nbImages;
-	}
+  /**
+   * Setter for the number of pages.
+   * 
+   * @param nbImages image counter
+   */
+  public void setNbImages(int nbImages) {
+    this.nbImages = nbImages;
+  }
 
-	/**
-	 * @return the isScan
-	 */
-	public boolean isScan() {
-		return isScan;
-	}
+  /**
+   * Boolean to know if the document is scan-based.
+   * @return isScan boolean to indicate if it's a scanned PDF
+   */
+  public boolean isScan() {
+    return isScan;
+  }
 
-	/**
-	 * @param isScan
-	 *            the isScan to set
-	 */
-	public void setScan(boolean isScan) {
-		this.isScan = isScan;
-	}
+  /**
+   * Setter for the scanned indicator.
+   * @param isScan boolean to indicate whether it's a scanned PDF
+   */
+  public void setScan(boolean isScan) {
+    this.isScan = isScan;
+  }
 
-	/**
-	 * @return the resolution
-	 */
-	public int getResolution() {
-		return resolution;
-	}
+  /**
+   * Getter for the resolution of the scan.
+   * 
+   * @return resolution in DPI
+   */
+  public int getResolution() {
+    return resolution;
+  }
 
-	/**
-	 * @param resolution
-	 *            the resolution to set
-	 */
-	public void setResolution(int resolution) {
-		this.resolution = resolution;
-	}
+  /**
+   * Setter for the resolution.
+   * 
+   * @param resolution the resolution to set
+   */
+  public void setResolution(int resolution) {
+    this.resolution = resolution;
+  }
 
-	/**
-	 * @return the timeToProcess
-	 */
-	public long getTimeToProcess() {
-		return timeToProcess;
-	}
+  /**
+   * Getter for the time of processing.
+   *
+   * @return timeToProcess time of processing in ms
+   */
+  public long getTimeToProcess() {
+    return timeToProcess;
+  }
 
-	/**
-	 * @param timeToProcess
-	 *            the timeToProcess to set
-	 */
-	public void setTimeToProcess(long timeToProcess) {
-		this.timeToProcess = timeToProcess;
-	}
+  /**
+   * Setter for the time of processing.
+   * 
+   * @param timeToProcess the timeToProcess to set
+   */
+  public void setTimeToProcess(long timeToProcess) {
+    this.timeToProcess = timeToProcess;
+  }
 
-	public static String headString() {
-		return "FILENAME;PROCESSING TIME;VALID;NB PAGES;NB IMAGES;TYPE;RESOLUTION";
-	}
+  /**
+   * Get a header for a list of file descriptions.
+   * 
+   * @return string to display
+   */
+  public static String headString() {
+    final String[] headers = {
+        "FILENAME","PROCESSING TIME","VALID","NB PAGES","NB IMAGES","TYPE","RESOLUTION"};
+    return String.join(SEP, headers);
+  }
 
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(file.getName());
-		sb.append(SEP).append(timeToProcess);
-		if (isValid) {
-			sb.append(SEP).append("valid");
-			sb.append(SEP).append(nbPages);
-			sb.append(SEP).append(nbImages);
-			if (isScan) {
-				sb.append(SEP).append("scanned pdf");
-				sb.append(SEP).append(resolution);
-			} else {
-				sb.append(SEP).append("native pdf");
-			}
-		} else {
-			sb.append(SEP).append("not valid");
+  /**
+   * Get a string representation of the file description.
+   * 
+   * @return string to display
+   */
+  public String toString() {
+    List<String> values = new ArrayList<>(10);
+    values.add(file.getName());
+    values.add(Long.toString(timeToProcess));
+    if (isValid) {
+      values.add("valid");
+      values.add(Integer.toString(nbPages));
+      values.add(Integer.toString(nbImages));
+      if (isScan) {
+        values.add("scanned pdf");
+        values.add(Integer.toString(resolution));
+      } else {
+        values.add("native pdf");
+      }
+    } else {
+      values.add("not valid");
 
-		}
-		return sb.toString();
-	}
+    }
+    return String.join(SEP, values);
+  }
 }
