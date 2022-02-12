@@ -2,6 +2,13 @@ package fr.bnf.toolslab;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 /**
  * ScannedPdf
@@ -15,15 +22,15 @@ public class ScannedPdfApp {
 		System.exit(1);
 	}
 
-	public static void main(String[] args) {
-		boolean useTrivial = false;
+	public static void main(String[] args) throws IOException {
+		boolean useAlternate = false;
 		if (args.length < 1) {
 			usage();
 			return;
 		}
 		int index = 0;
-		if ("-bad".equals(args[0])) {
-			useTrivial = true;
+		if ("-alt".equals(args[0])) {
+			useAlternate = true;
 			index++;
 		}
 
@@ -34,10 +41,8 @@ public class ScannedPdfApp {
 			return;
 		}
 
-		AbstractScanDetector detector = new AlternatePdfBoxScanDetector();
-		if (useTrivial) {
-			detector = new PdfBoxScanDetector();
-		}
+		final AbstractScanDetector detector = useAlternate ? new AlternatePdfBoxScanDetector()
+				: new PdfBoxScanDetector();
 
 		if (fIn.isFile()) {
 			FileDescriptor fd = new FileDescriptor(fIn);
@@ -53,28 +58,28 @@ public class ScannedPdfApp {
 
 		} else if (fIn.isDirectory()) {
 			// Retrieve only the .pdf files
-			File[] files = fIn.listFiles((file) -> {
-				if (!file.canRead()) {
-					return false;
-				}
-				String filename = file.getName();
-				return filename.endsWith(".pdf");
-			});
-			if (files == null) {
-				return;
-			}
+			final PathMatcher pdfMatcher = FileSystems.getDefault()
+					.getPathMatcher("glob:*.pdf");
 			System.out.println(FileDescriptor.headString());
-			for (File f : files) {
-				FileDescriptor fd = new FileDescriptor(f);
-				detector.init(fd);
-				try {
-					detector.parse();
-				} catch (IOException e) {
-					System.err.println("Error process file " + e.getMessage());
-					fd.setValid(false);
+			Files.walkFileTree(fIn.toPath(), new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file,
+						BasicFileAttributes attrs) {
+					if (pdfMatcher.matches(file.getFileName())) {
+						FileDescriptor fd = new FileDescriptor(file.toFile());
+						detector.init(fd);
+						try {
+							detector.parse();
+						} catch (IOException e) {
+							System.err.println("Error process file "
+									+ e.getMessage());
+							fd.setValid(false);
+						}
+						System.out.println(fd.toString());
+					}
+					return FileVisitResult.CONTINUE;
 				}
-				System.out.println(fd.toString());
-			}
+			});
 		}
 	}
 }

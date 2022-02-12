@@ -117,7 +117,8 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param timeToProcess the timeToProcess to set
+	 * @param timeToProcess
+	 *            the timeToProcess to set
 	 */
 	public void setTimeToProcess(long timeToProcess) {
 		this.timeToProcess = timeToProcess;
@@ -126,7 +127,7 @@ public class FileDescriptor {
 	public static String headString() {
 		return "FILENAME;PROCESSING TIME;VALID;NB PAGES;NB IMAGES;TYPE;RESOLUTION";
 	}
-	
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(file.getName());

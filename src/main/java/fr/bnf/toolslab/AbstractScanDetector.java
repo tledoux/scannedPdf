@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.pdmodel.PDResources;
 
 public abstract class AbstractScanDetector {
 	protected static Logger LOGGER = Logger
@@ -21,39 +21,6 @@ public abstract class AbstractScanDetector {
 	abstract void init(FileDescriptor fd);
 
 	abstract void parse() throws IOException;
-
-	/**
-	 * Returns the resource with the given name and kind as an indirect object,
-	 * or null.
-	 * Method taken from org.apache.pdfbox.pdmodel.PDResources that are private !!!
-	 */
-	protected COSObject getIndirect(COSDictionary resources, COSName kind,
-			COSName name) {
-		COSDictionary dict = (COSDictionary) resources
-				.getDictionaryObject(kind);
-		if (dict == null) {
-			return null;
-		}
-		COSBase base = dict.getItem(name);
-		if (base instanceof COSObject) {
-			return (COSObject) base;
-		}
-		// not an indirect object. Resource may have been added at runtime.
-		return null;
-	}
-
-	/**
-	 * Returns the resource with the given name and kind, or null.
-	 * Method taken from org.apache.pdfbox.pdmodel.PDResources that are private !!!
-	 */
-	protected COSBase get(COSDictionary resources, COSName kind, COSName name) {
-		COSDictionary dict = (COSDictionary) resources
-				.getDictionaryObject(kind);
-		if (dict == null) {
-			return null;
-		}
-		return dict.getDictionaryObject(name);
-	}
 
 	/**
 	 * Select nbSamples pages in a random fashion
@@ -93,6 +60,38 @@ public abstract class AbstractScanDetector {
 		LOGGER.fine("Found density of " + (int) dpiX);
 
 		return (int) dpiX;
+	}
+
+	/**
+	 * Lookup the technical metadata of an image WITHOUT reading the image !!!
+	 * 
+	 * Don't call resc.getXObject() on a image, access the COSStream directly
+	 * 
+	 * @param pdResources
+	 *            the resources of the parent
+	 * @param name
+	 *            the name of the object
+	 * @return the dimension of the image
+	 * @throws IOException
+	 */
+	protected DimensionInfo lookupImage(PDResources pdResources, COSName name)
+			throws IOException {
+		COSDictionary resc = pdResources.getCOSObject();
+		COSDictionary dict = (COSDictionary) resc
+				.getDictionaryObject(COSName.XOBJECT);
+		if (dict == null) {
+			// No image
+			return DimensionInfo.EMPTY;
+		}
+		try (COSStream stream = dict.getCOSStream(name)) {
+			if (stream != null
+					&& COSName.IMAGE.equals(stream.getCOSName(COSName.SUBTYPE))) {
+				Long width = stream.getLong(COSName.WIDTH);
+				Long height = stream.getLong(COSName.HEIGHT);
+				return new DimensionInfo(width, height);
+			}
+		}
+		return DimensionInfo.EMPTY;
 	}
 
 }

@@ -6,15 +6,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
-import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.PDXObject;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 
 public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 	protected static Logger LOGGER = Logger
@@ -118,70 +116,39 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 		pageDimensions.add(dimPage);
 
 		PDResources resources = page.getResources();
-		COSDictionary resc = resources.getCOSObject();
-
-		recurseLookForImage(resc, numPage == 2);
-
-		return nbImagesInPage;
-	}
-
-	protected void recurseLookForImage(COSDictionary resc, boolean debug)
-			throws IOException {
-		COSDictionary dict = (COSDictionary) resc
-				.getDictionaryObject(COSName.XOBJECT);
-		if (dict == null) {
-			// No image
-			if (debug) {
-				LOGGER.fine("No XOBJECT dictionnary");
-			}
-			return;
-		}
-
-		for (Entry<COSName, COSBase> e : dict.entrySet()) {
-			if (debug) {
-				LOGGER.fine("Looking for entry key=" + e.getKey());
-			}
-			COSBase value = e.getValue();
-			if (debug) {
-				LOGGER.fine("Looking for entry value=" + value + ", class="
-						+ value.getClass());
-			}
-			if (value == null) {
-				continue;
-			} else if (value instanceof COSObject) {
-				value = ((COSObject) value).getObject();
-			}
-			if (debug) {
-				LOGGER.fine("Looking for object=" + value + ", class="
-						+ value.getClass());
-			}
-			if (!(value instanceof COSStream)) {
-				continue;
-			}
-			try (COSStream stream = (COSStream) value) {
-				COSName subtype = stream.getCOSName(COSName.SUBTYPE);
-				if (COSName.IMAGE.equals(subtype)) {
-					Long width = stream.getLong(COSName.WIDTH);
-					Long height = stream.getLong(COSName.HEIGHT);
-					DimensionInfo dimImage = new DimensionInfo(width, height);
-					if (debug)
-						LOGGER.fine("Found image " + e.getKey()
-								+ " with dimension " + dimImage.toString());
+		for (COSName name : resources.getXObjectNames()) {
+			if (resources.isImageXObject(name)) {
+				DimensionInfo dimImage = lookupImage(resources, name);
+				if (!DimensionInfo.EMPTY.equals(dimImage)) {
 					if (nbImagesInPage == 0) {
 						// Only record the first dimension in a page
 						imageDimensions.add(dimImage);
 					}
 					nbImagesInPage++;
-				} else if (COSName.FORM.equals(subtype)) {
-					// Look for a image in the resources
-					COSDictionary streamResc = (COSDictionary) stream
-							.getCOSDictionary(COSName.RESOURCES);
-					if (streamResc != null) {
-						recurseLookForImage(streamResc, debug);
+				}
+				continue;
+			}
+			PDXObject xobject = resources.getXObject(name);
+			if (xobject instanceof PDFormXObject) {
+				PDFormXObject form = (PDFormXObject) xobject;
+				PDResources formResources = form.getResources();
+				for (COSName nameInForm : formResources.getXObjectNames()) {
+					if (formResources.isImageXObject(nameInForm)) {
+						DimensionInfo dimImage = lookupImage(formResources,
+								nameInForm);
+						if (!DimensionInfo.EMPTY.equals(dimImage)) {
+							if (nbImagesInPage == 0) {
+								// Only record the first dimension in a page
+								imageDimensions.add(dimImage);
+							}
+							nbImagesInPage++;
+						}
+						continue;
 					}
 				}
 			}
 		}
-	}
 
+		return nbImagesInPage;
+	}
 }

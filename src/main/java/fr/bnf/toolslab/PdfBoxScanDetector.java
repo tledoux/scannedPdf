@@ -5,15 +5,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
-import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.PDXObject;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 
 public class PdfBoxScanDetector extends AbstractScanDetector {
 	protected static Logger LOGGER = Logger.getLogger(PdfBoxScanDetector.class
@@ -80,19 +78,26 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 		}
 	}
 
-	int countImages(PDDocument document) {
+	int countImages(PDDocument document) throws IOException {
 		int nbImages = 0;
-		int numPage = 0;
 		for (PDPage page : document.getPages()) {
-			numPage++;
 			PDResources resources = page.getResources();
-			// TODO Should recurse to find the images in FORM
+			// Count the images in the page or in the form of the page
 			for (COSName name : resources.getXObjectNames()) {
-				if (numPage == 1) {
-					LOGGER.fine("COSName = " + name);
-				}
 				if (resources.isImageXObject(name)) {
 					nbImages++;
+					continue;
+				}
+				PDXObject xobject = resources.getXObject(name);
+				if (xobject instanceof PDFormXObject) {
+					PDFormXObject form = (PDFormXObject) xobject;
+					PDResources formResources = form.getResources();
+					for (COSName nameInForm : formResources.getXObjectNames()) {
+						if (formResources.isImageXObject(nameInForm)) {
+							nbImages++;
+							continue;
+						}
+					}
 				}
 			}
 		}
@@ -115,33 +120,28 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 		LOGGER.fine("Found page dimension " + dimPage.toString());
 
 		// Enumerate the resources to avoid building a complete image
-		PDResources pdResources = page.getResources();
-		COSDictionary resc = pdResources.getCOSObject();
-		COSDictionary dict = (COSDictionary) resc
-				.getDictionaryObject(COSName.XOBJECT);
-		if (dict == null) {
-			// No image
-			return 0;
-		}
-		for (Entry<COSName, COSBase> e : dict.entrySet()) {
-			// LOGGER.fine("Looking for entry " + e.getKey());
-			COSBase c = e.getValue();
-			if (c == null) {
-				continue;
-			} else if (c instanceof COSObject) {
-				c = ((COSObject) c).getObject();
-			}
-			if (!(c instanceof COSStream)) {
-				continue;
-			}
-			try (COSStream stream = (COSStream) c) {
-				if (COSName.IMAGE.equals(stream.getCOSName(COSName.SUBTYPE))) {
-					Long width = stream.getLong(COSName.WIDTH);
-					Long height = stream.getLong(COSName.HEIGHT);
-					DimensionInfo dimImage = new DimensionInfo(width, height);
-					LOGGER.fine("Found image " + e.getKey()
-							+ " with dimension " + dimImage.toString());
+		PDResources resources = page.getResources();
+		// Count the images in the page or in the form of the page
+		for (COSName name : resources.getXObjectNames()) {
+			if (resources.isImageXObject(name)) {
+				DimensionInfo dimImage = lookupImage(resources, name);
+				if (!DimensionInfo.EMPTY.equals(dimImage)) {
 					return findDensity(dimImage, dimPage, userUnit);
+				}
+
+			}
+			PDXObject xobject = resources.getXObject(name);
+			if (xobject instanceof PDFormXObject) {
+				PDFormXObject form = (PDFormXObject) xobject;
+				PDResources formResources = form.getResources();
+				for (COSName nameInForm : formResources.getXObjectNames()) {
+					if (formResources.isImageXObject(nameInForm)) {
+						DimensionInfo dimImage = lookupImage(formResources,
+								nameInForm);
+						if (!DimensionInfo.EMPTY.equals(dimImage)) {
+							return findDensity(dimImage, dimPage, userUnit);
+						}
+					}
 				}
 			}
 		}
