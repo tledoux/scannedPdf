@@ -3,14 +3,12 @@ package fr.bnf.toolslab;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.graphics.PDXObject;
-import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 
 public class PdfBoxScanDetector extends AbstractScanDetector {
   protected static final Logger LOGGER = Logger.getLogger(PdfBoxScanDetector.class.getName());
@@ -82,29 +80,17 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
    * @throws IOException exception if error while reading the file
    */
   int countImages(PDDocument document) throws IOException {
-    int nbImages = 0;
+    final AtomicInteger nbImages = new AtomicInteger();
     for (PDPage page : document.getPages()) {
       PDResources resources = page.getResources();
-      // Count the images in the page or in the form of the page
-      for (COSName name : resources.getXObjectNames()) {
-        if (resources.isImageXObject(name)) {
-          nbImages++;
-          continue;
+      recurseForImages(resources, dimImage -> {
+        if (!DimensionInfo.EMPTY.equals(dimImage)) {
+          nbImages.incrementAndGet();
         }
-        PDXObject xobject = resources.getXObject(name);
-        if (xobject instanceof PDFormXObject) {
-          PDFormXObject form = (PDFormXObject) xobject;
-          PDResources formResources = form.getResources();
-          for (COSName nameInForm : formResources.getXObjectNames()) {
-            if (formResources.isImageXObject(nameInForm)) {
-              nbImages++;
-              continue;
-            }
-          }
-        }
-      }
+        return true;
+      });
     }
-    return nbImages;
+    return nbImages.get();
   }
 
   /**
@@ -120,33 +106,16 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 
     DimensionInfo dimPage = new DimensionInfo((long) rect.getWidth(), (long) rect.getHeight());
     LOGGER.fine("Found page dimension " + dimPage.toString());
-
+    AtomicInteger density = new AtomicInteger(0);
     // Enumerate the resources to avoid building a complete image
     PDResources resources = page.getResources();
-    // Count the images in the page or in the form of the page
-    for (COSName name : resources.getXObjectNames()) {
-      if (resources.isImageXObject(name)) {
-        DimensionInfo dimImage = lookupImage(resources, name);
-        if (!DimensionInfo.EMPTY.equals(dimImage)) {
-          return findDensity(dimImage, dimPage, userUnit);
-        }
-
+    recurseForImages(resources, dimImage -> {
+      if (!DimensionInfo.EMPTY.equals(dimImage)) {
+        density.set(findDensity(dimImage, dimPage, userUnit));
+        return false;
       }
-      PDXObject xobject = resources.getXObject(name);
-      if (xobject instanceof PDFormXObject) {
-        PDFormXObject form = (PDFormXObject) xobject;
-        PDResources formResources = form.getResources();
-        for (COSName nameInForm : formResources.getXObjectNames()) {
-          if (formResources.isImageXObject(nameInForm)) {
-            DimensionInfo dimImage = lookupImage(formResources, nameInForm);
-            if (!DimensionInfo.EMPTY.equals(dimImage)) {
-              return findDensity(dimImage, dimPage, userUnit);
-            }
-          }
-        }
-      }
-    }
-    return 0;
+      return true;
+    });
+    return density.get();
   }
-
 }

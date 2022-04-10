@@ -48,11 +48,7 @@ public class DpiCounter {
         .orElseGet(() -> defaultValue);
   }
 
-  /**
-   * Get a string representation of the counter.
-   * 
-   * @return string to display
-   */
+  @Override
   public String toString() {
     final Comparator<Map.Entry<Integer, Integer>> keyComparator =
         Map.Entry.comparingByKey(Comparator.naturalOrder());

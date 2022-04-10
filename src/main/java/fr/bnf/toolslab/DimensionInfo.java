@@ -39,6 +39,7 @@ public class DimensionInfo {
     return this.width >= otherDim.width && this.height >= otherDim.height;
   }
 
+  @Override
   public String toString() {
     return String.format("[%dx%d]", width, height);
   }

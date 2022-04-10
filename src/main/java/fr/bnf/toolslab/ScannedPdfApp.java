@@ -16,7 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class ScannedPdfApp {
 
   public static void usage() {
-    System.err.println("Usage : " + ScannedPdfApp.class.getName() + " <fileToTest>");
+    System.err.println("Usage : " + ScannedPdfApp.class.getName() + " <fileOrDirectoryToTest>");
     System.exit(1);
   }
 
@@ -24,10 +24,11 @@ public class ScannedPdfApp {
    * Main method.
    * 
    * @param args arguments given in the command line
-   * @throws IOException exception if error while accessingthe files
+   * @throws IOException exception if error while accessing the files
    */
   public static void main(String[] args) throws IOException {
     boolean useAlternate = false;
+    boolean useStream = false;
     if (args.length < 1) {
       usage();
       return;
@@ -35,6 +36,9 @@ public class ScannedPdfApp {
     int index = 0;
     if ("-alt".equals(args[0])) {
       useAlternate = true;
+      index++;
+    } else if ("-stream".equals(args[0])) {
+      useStream = true;
       index++;
     }
 
@@ -46,17 +50,11 @@ public class ScannedPdfApp {
     }
 
     final AbstractScanDetector detector =
-        useAlternate ? new AlternatePdfBoxScanDetector() : new PdfBoxScanDetector();
+        useAlternate ? new AlternatePdfBoxScanDetector()
+            : (useStream ? new StreamPdfBoxScanDetector() : new PdfBoxScanDetector());
 
     if (inputFile.isFile()) {
-      FileDescriptor fd = new FileDescriptor(inputFile);
-      detector.init(fd);
-      try {
-        detector.parse();
-      } catch (IOException e) {
-        System.err.println("Error process file " + e.getMessage());
-        fd.setValid(false);
-      }
+      FileDescriptor fd = processFile(inputFile, detector);
       System.out.println(FileDescriptor.headString());
       System.out.println(fd.toString());
 
@@ -68,19 +66,29 @@ public class ScannedPdfApp {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
           if (pdfMatcher.matches(file.getFileName())) {
-            FileDescriptor fd = new FileDescriptor(file.toFile());
-            detector.init(fd);
-            try {
-              detector.parse();
-            } catch (IOException e) {
-              System.err.println("Error process file " + e.getMessage());
-              fd.setValid(false);
-            }
+            FileDescriptor fd = processFile(file.toFile(), detector);
             System.out.println(fd.toString());
           }
           return FileVisitResult.CONTINUE;
         }
       });
     }
+  }
+
+  /**
+   * @param inputFile
+   * @param detector
+   * @return
+   */
+  private static FileDescriptor processFile(File inputFile, final AbstractScanDetector detector) {
+    FileDescriptor fd = new FileDescriptor(inputFile);
+    detector.init(fd);
+    try {
+      detector.parse();
+    } catch (IOException e) {
+      System.err.println("Error process file " + e.getMessage());
+      fd.setValid(false);
+    }
+    return fd;
   }
 }

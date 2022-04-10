@@ -2,49 +2,56 @@ package fr.bnf.toolslab;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
-public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
-  protected static final Logger LOGGER = Logger.getLogger(AlternatePdfBoxScanDetector.class
-      .getName());
+public class StreamPdfBoxScanDetector extends AbstractScanDetector {
+  protected static final Logger LOGGER = Logger.getLogger(StreamPdfBoxScanDetector.class.getName());
 
   FileDescriptor fd;
-  AtomicInteger nbPages;
-  AtomicInteger nbImages;
+  int nbPages;
+  int nbImages;
+  int nbImagesInPage;
   List<DimensionInfo> pageDimensions;
   List<DimensionInfo> imageDimensions;
+  private Map<COSStream, Integer> processedInlineImages = new HashMap<>();
+  private AtomicInteger inlineImageCounter = new AtomicInteger(0);
 
   @Override
   public void init(FileDescriptor fd) {
     LOGGER.fine("Processing " + fd.getFile().getName());
     this.fd = fd;
-    this.nbPages = new AtomicInteger(0);
-    this.nbImages = new AtomicInteger(0);
+    this.nbPages = 0;
+    this.nbImages = 0;
     this.pageDimensions = new ArrayList<>();
     this.imageDimensions = new ArrayList<>();
+    processedInlineImages = new HashMap<>();
+    inlineImageCounter = new AtomicInteger(0);
   }
 
   @Override
   public void parse() throws IOException {
     long beginTime = System.currentTimeMillis();
     try (PDDocument document = PDDocument.load(fd.getFile())) {
-      this.nbPages.set(0);
-      this.nbImages.set(0);;
+      this.nbPages = 0;
+      this.nbImages = 0;
       fd.setValid(true);
-      fd.setNbPages(0);
+      fd.setNbPages(nbPages);
       for (PDPage page : document.getPages()) {
-        this.nbPages.incrementAndGet();
-        this.nbImages.getAndAdd(parsePage(page, this.nbPages.get()));
+        this.nbPages++;
+        this.nbImages += parsePage(page, this.nbPages);
       }
-      fd.setNbPages(this.nbPages.get());
-      fd.setNbImages(this.nbImages.get());
+      this.nbImages = inlineImageCounter.get();
+      fd.setNbPages(this.nbPages);
+      fd.setNbImages(this.nbImages);
       LOGGER.fine("First pass in " + (System.currentTimeMillis() - beginTime));
 
       // First heuristic: compare the number of pages and the number of
@@ -57,8 +64,8 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 
       // Second heuristic: pick some pages and look if the image covers
       // all the page
-      int nbSamples = Math.min(nbPages.get(), MAX_SAMPLES);
-      List<Integer> pagesToTest = pickSamples(nbSamples, nbPages.get());
+      int nbSamples = Math.min(nbPages, MAX_SAMPLES);
+      List<Integer> pagesToTest = pickSamples(nbSamples, nbPages);
 
       // Classify all the dpiFound (could be 0)
       DpiCounter counter = new DpiCounter();
@@ -99,27 +106,31 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
   }
 
   protected int parsePage(PDPage page, int numPage) throws IOException {
-    // First retrieve the dimension of the page
+    nbImagesInPage = 0;
     PDRectangle rect = page.getMediaBox(); // Found page dimension
     // MediaBox specified in "default user space units", which is points
     // (i.e. 72 dpi)
     // float userUnit = page.getUserUnit(); // in multiples of 1/72 inch
+
     DimensionInfo dimPage = new DimensionInfo((long) (rect.getWidth()), (long) (rect.getHeight()));
     LOGGER.fine("Found page [" + numPage + "] with dimension " + dimPage.toString());
     pageDimensions.add(dimPage);
-    // Then lookup for all he images (either direct or in forms)
-    AtomicInteger nbImagesInPage = new AtomicInteger(0);
-    PDResources resources = page.getResources();
 
-    recurseForImages(resources, dimImage -> {
-      if (!DimensionInfo.EMPTY.equals(dimImage)) {
-        if (nbImagesInPage.getAndIncrement() == 0) {
-          // Only record the first dimension in a page
-        imageDimensions.add(dimImage);
+    try {
+      int initialNumber = inlineImageCounter.get();
+      ImageGraphicsEngine engine =
+          new ImageGraphicsEngine(page, processedInlineImages, inlineImageCounter);
+      engine.run();
+      nbImagesInPage = inlineImageCounter.get() - initialNumber;
+      if (nbImagesInPage == 0) {
+        imageDimensions.add(DimensionInfo.EMPTY);
+      } else {
+        imageDimensions.add(engine.getImageDimensions().get(0));
       }
+    } catch (IOException e) {
+      e.printStackTrace();
+
     }
-    return true;
-  } );
-    return nbImagesInPage.get();
+    return nbImagesInPage;
   }
 }

@@ -41,6 +41,7 @@ public class FileDescriptor {
 
   /**
    * Boolean to know if the file is valid.
+   * 
    * @return isValid validity of the file
    */
   public boolean isValid() {
@@ -94,6 +95,7 @@ public class FileDescriptor {
 
   /**
    * Boolean to know if the document is scan-based.
+   * 
    * @return isScan boolean to indicate if it's a scanned PDF
    */
   public boolean isScan() {
@@ -102,6 +104,7 @@ public class FileDescriptor {
 
   /**
    * Setter for the scanned indicator.
+   * 
    * @param isScan boolean to indicate whether it's a scanned PDF
    */
   public void setScan(boolean isScan) {
@@ -150,16 +153,12 @@ public class FileDescriptor {
    * @return string to display
    */
   public static String headString() {
-    final String[] headers = {
-        "FILENAME","PROCESSING TIME","VALID","NB PAGES","NB IMAGES","TYPE","RESOLUTION"};
+    final String[] headers =
+        {"FILENAME", "PROCESSING TIME", "VALID", "NB PAGES", "NB IMAGES", "TYPE", "RESOLUTION"};
     return String.join(SEP, headers);
   }
 
-  /**
-   * Get a string representation of the file description.
-   * 
-   * @return string to display
-   */
+  @Override
   public String toString() {
     List<String> values = new ArrayList<>(10);
     values.add(file.getName());

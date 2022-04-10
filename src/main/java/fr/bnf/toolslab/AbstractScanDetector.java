@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.PDXObject;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 
 public abstract class AbstractScanDetector {
   protected static final Logger LOGGER = Logger.getLogger(AbstractScanDetector.class.getName());
@@ -29,6 +32,59 @@ public abstract class AbstractScanDetector {
    * @throws IOException exception if error while reading the file
    */
   abstract void parse() throws IOException;
+
+  /**
+   * Recursively inspect the resources looking for images.
+   * 
+   * @param resources resources to inspect
+   * @param predicate a predicate to call for each image. Return <code>true</code> if recursion
+   *        continues.
+   * @throws IOException in case of IO problems
+   */
+  void recurseForImages(PDResources resources, Predicate<DimensionInfo> predicate)
+      throws IOException {
+    for (COSName name : resources.getXObjectNames()) {
+      if (resources.isImageXObject(name)) {
+        DimensionInfo dimImage = lookupImage(resources, name);
+        if (!predicate.test(dimImage)) {
+          break;
+        }
+        continue;
+      }
+      PDXObject xobject = resources.getXObject(name);
+      if (xobject instanceof PDFormXObject) {
+        PDFormXObject form = (PDFormXObject) xobject;
+        PDResources formResources = form.getResources();
+        recurseForImages(formResources, predicate);
+      }
+    }
+  }
+
+  /**
+   * Lookup the technical metadata of an image WITHOUT reading the image. <b>Don't call
+   * resc.getXObject() on a image, access the COSStream directly.</b>
+   * 
+   * @param pdResources the resources of the parent
+   * @param name the name of the object
+   * @return the dimension of the image
+   * @throws IOException exception if error while reading the file
+   */
+  protected DimensionInfo lookupImage(PDResources pdResources, COSName name) throws IOException {
+    COSDictionary resc = pdResources.getCOSObject();
+    COSDictionary dict = (COSDictionary) resc.getDictionaryObject(COSName.XOBJECT);
+    if (dict == null) {
+      // No image
+      return DimensionInfo.EMPTY;
+    }
+    try (COSStream stream = dict.getCOSStream(name)) {
+      if (stream != null && COSName.IMAGE.equals(stream.getCOSName(COSName.SUBTYPE))) {
+        Long width = stream.getLong(COSName.WIDTH);
+        Long height = stream.getLong(COSName.HEIGHT);
+        return new DimensionInfo(width, height);
+      }
+    }
+    return DimensionInfo.EMPTY;
+  }
 
   /**
    * Select nbSamples pages in a random fashion.
@@ -67,32 +123,6 @@ public abstract class AbstractScanDetector {
     LOGGER.fine("Found density of " + (int) dpiX);
 
     return (int) dpiX;
-  }
-
-  /**
-   * Lookup the technical metadata of an image WITHOUT reading the image. <b>Don't call
-   * resc.getXObject() on a image, access the COSStream directly.</b>
-   * 
-   * @param pdResources the resources of the parent
-   * @param name the name of the object
-   * @return the dimension of the image
-   * @throws IOException exception if error while reading the file
-   */
-  protected DimensionInfo lookupImage(PDResources pdResources, COSName name) throws IOException {
-    COSDictionary resc = pdResources.getCOSObject();
-    COSDictionary dict = (COSDictionary) resc.getDictionaryObject(COSName.XOBJECT);
-    if (dict == null) {
-      // No image
-      return DimensionInfo.EMPTY;
-    }
-    try (COSStream stream = dict.getCOSStream(name)) {
-      if (stream != null && COSName.IMAGE.equals(stream.getCOSName(COSName.SUBTYPE))) {
-        Long width = stream.getLong(COSName.WIDTH);
-        Long height = stream.getLong(COSName.HEIGHT);
-        return new DimensionInfo(width, height);
-      }
-    }
-    return DimensionInfo.EMPTY;
   }
 
 }
