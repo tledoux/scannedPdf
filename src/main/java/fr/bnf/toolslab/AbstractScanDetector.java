@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 
@@ -61,6 +64,28 @@ public abstract class AbstractScanDetector {
   }
 
   /**
+   * Find the filter associated with the stream.
+   * FLate= Direct, DCT=JPEG, JPX=JPEG2000, CCITT=TIFF G3, LZW=compress LZW, RLE=compress RLE, JBIG2
+   * @param stream
+   * @return name of the filter
+   */
+  protected String decodeFilter(COSStream stream) {
+    COSBase filters = stream.getFilters();
+    if (filters instanceof COSName) {
+      return ((COSName) filters).getName();
+    } else if (filters instanceof COSArray) {
+      COSArray filterArray = (COSArray) filters;
+      for (int i = 0; i < filterArray.size(); i++) {
+        COSBase base = filterArray.get(i);
+        if (base instanceof COSName) {
+          return ((COSName) filters).getName();
+        }
+      }
+    }
+    return "";
+  }
+
+  /**
    * Lookup the technical metadata of an image WITHOUT reading the image. <b>Don't call
    * resc.getXObject() on a image, access the COSStream directly.</b>
    * 
@@ -80,6 +105,7 @@ public abstract class AbstractScanDetector {
       if (stream != null && COSName.IMAGE.equals(stream.getCOSName(COSName.SUBTYPE))) {
         Long width = stream.getLong(COSName.WIDTH);
         Long height = stream.getLong(COSName.HEIGHT);
+        LOGGER.info("Image filter " + decodeFilter(stream));
         return new DimensionInfo(width, height);
       }
     }

@@ -36,7 +36,7 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
     long beginTime = System.currentTimeMillis();
     try (PDDocument document = PDDocument.load(fd.getFile())) {
       this.nbPages.set(0);
-      this.nbImages.set(0);;
+      this.nbImages.set(0);
       fd.setValid(true);
       fd.setNbPages(0);
       for (PDPage page : document.getPages()) {
@@ -49,7 +49,7 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
 
       // First heuristic: compare the number of pages and the number of
       // images
-      if (this.nbPages != this.nbImages) {
+      if (this.nbPages.get() != this.nbImages.get()) {
         fd.setScan(false);
         return;
       }
@@ -59,7 +59,6 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
       // all the page
       int nbSamples = Math.min(nbPages.get(), MAX_SAMPLES);
       List<Integer> pagesToTest = pickSamples(nbSamples, nbPages.get());
-
       // Classify all the dpiFound (could be 0)
       DpiCounter counter = new DpiCounter();
 
