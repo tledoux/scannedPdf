@@ -21,7 +21,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 /**
- * Operator to take place of the normal one
+ * Operator to take place of the normal one.
  *
  */
 public class DrawObjectOperator extends GraphicsOperatorProcessor {

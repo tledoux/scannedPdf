@@ -12,7 +12,6 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 
@@ -64,9 +63,10 @@ public abstract class AbstractScanDetector {
   }
 
   /**
-   * Find the filter associated with the stream.
-   * FLate= Direct, DCT=JPEG, JPX=JPEG2000, CCITT=TIFF G3, LZW=compress LZW, RLE=compress RLE, JBIG2
-   * @param stream
+   * Find the filter associated with the stream. FLate= Direct, DCT=JPEG, JPX=JPEG2000, CCITT=TIFF
+   * G3, LZW=compress LZW, RLE=compress RLE, JBIG2
+   * 
+   * @param stream stream to analyze
    * @return name of the filter
    */
   protected String decodeFilter(COSStream stream) {

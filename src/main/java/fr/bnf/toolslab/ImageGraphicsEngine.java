@@ -30,7 +30,7 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
   private final Map<COSStream, Integer> processedInlineImages;
   private final AtomicInteger imageCounter;
   private final List<DimensionInfo> imageDimensions;
-  
+
   protected ImageGraphicsEngine(PDPage page, Map<COSStream, Integer> processedInlineImages,
       AtomicInteger imageCounter) {
     super(page);
@@ -42,7 +42,7 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
     addOperator(new NoOpOperator(OperatorName.SHOW_TEXT_ADJUSTED));
     addOperator(new NoOpOperator(OperatorName.SHOW_TEXT_LINE));
     addOperator(new NoOpOperator(OperatorName.SHOW_TEXT_LINE_AND_SPACE));
-    
+
     this.processedInlineImages = processedInlineImages;
     this.imageCounter = imageCounter;
     this.imageDimensions = new ArrayList<>();
@@ -68,10 +68,8 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
         // skip duplicate image
         return;
       }
-      if (cachedNumber == null) {
-        imageNumber = imageCounter.getAndIncrement();
-        processedInlineImages.put(xobject.getCOSObject(), imageNumber);
-      }
+      imageNumber = imageCounter.getAndIncrement();
+      processedInlineImages.put(xobject.getCOSObject(), imageNumber);
     } else if (pdImage instanceof PDImageWrap) {
       PDImageWrap xobject = (PDImageWrap) pdImage;
       Integer cachedNumber = processedInlineImages.get(xobject.getCOSObject());
@@ -79,10 +77,8 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
         // skip duplicate image
         return;
       }
-      if (cachedNumber == null) {
-        imageNumber = imageCounter.getAndIncrement();
-        processedInlineImages.put(xobject.getCOSObject(), imageNumber);
-      }
+      imageNumber = imageCounter.getAndIncrement();
+      processedInlineImages.put(xobject.getCOSObject(), imageNumber);
     } else {
       imageNumber = imageCounter.getAndIncrement();
     }
@@ -133,19 +129,15 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
     /* DO NOTHING */
   }
 
-  //@Override
+  // @Override
   protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, String unicode,
       Vector displacement) throws IOException {
-/* THL
-    RenderingMode renderingMode = getGraphicsState().getTextState().getRenderingMode();
-    if (renderingMode.isFill()) {
-      processColor(getGraphicsState().getNonStrokingColor());
-    }
-
-    if (renderingMode.isStroke()) {
-      processColor(getGraphicsState().getStrokingColor());
-    }
-    */
+    /*
+     * THL RenderingMode renderingMode = getGraphicsState().getTextState().getRenderingMode(); if
+     * (renderingMode.isFill()) { processColor(getGraphicsState().getNonStrokingColor()); }
+     * 
+     * if (renderingMode.isStroke()) { processColor(getGraphicsState().getStrokingColor()); }
+     */
   }
 
   @Override
@@ -155,12 +147,12 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
 
   @Override
   public void fillPath(int windingRule) throws IOException {
-    //THL processColor(getGraphicsState().getNonStrokingColor());
+    // THL processColor(getGraphicsState().getNonStrokingColor());
   }
 
   @Override
   public void fillAndStrokePath(int windingRule) throws IOException {
-    //THL processColor(getGraphicsState().getNonStrokingColor());
+    // THL processColor(getGraphicsState().getNonStrokingColor());
   }
 
   @Override
@@ -182,6 +174,8 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
   }
 
   /**
+   * Getter for the imageCounter.
+   * 
    * @return the imageCounter
    */
   public AtomicInteger getImageCounter() {
@@ -189,6 +183,8 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
   }
 
   /**
+   * Getter for all the image dimensions.
+   * 
    * @return the imageDimensions
    */
   public List<DimensionInfo> getImageDimensions() {

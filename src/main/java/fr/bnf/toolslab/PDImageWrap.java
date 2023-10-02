@@ -27,9 +27,7 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceGray;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
 
 /**
- * A wrapper around a image.
- * 
- * The buffer is not decoded
+ * A wrapper around a image. The buffer is not decoded.
  */
 public class PDImageWrap extends PDXObject implements PDImage {
 
@@ -41,7 +39,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
   private PDColorSpace colorSpace;
 
   /**
-   * current resource dictionary (has color spaces)
+   * current resource dictionary (has color spaces).
    */
   private final PDResources resources;
 
@@ -306,8 +304,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
   /**
    * This will get the optional content group or optional content membership dictionary.
    *
-   * @return The optional content group or optional content membership dictionary or null if there
-   *         is none.
+   * @return The optional content group or content membership dictionary or null if there is none.
    */
   public PDPropertyList getOptionalContent() {
     COSDictionary optionalContent = getCOSObject().getCOSDictionary(COSName.OC);
@@ -315,7 +312,6 @@ public class PDImageWrap extends PDXObject implements PDImage {
   }
 
   /**
-   * 
    * Sets the optional content group or optional content membership dictionary.
    * 
    * @param oc The optional content group or optional content membership dictionary.

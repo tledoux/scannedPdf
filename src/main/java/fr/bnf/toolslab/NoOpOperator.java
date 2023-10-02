@@ -8,7 +8,7 @@ import org.apache.pdfbox.contentstream.operator.graphics.GraphicsOperatorProcess
 import org.apache.pdfbox.cos.COSBase;
 
 /**
- * Operator to take place of the normal one
+ * Operator to take place of the normal one.
  *
  */
 public class NoOpOperator extends GraphicsOperatorProcessor {

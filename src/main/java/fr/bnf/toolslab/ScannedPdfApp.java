@@ -76,9 +76,10 @@ public class ScannedPdfApp {
   }
 
   /**
-   * @param inputFile
-   * @param detector
-   * @return
+   * Process a given file.
+   * @param inputFile file to process
+   * @param detector detector to use
+   * @return the description of the file
    */
   private static FileDescriptor processFile(File inputFile, final AbstractScanDetector detector) {
     FileDescriptor fd = new FileDescriptor(inputFile);

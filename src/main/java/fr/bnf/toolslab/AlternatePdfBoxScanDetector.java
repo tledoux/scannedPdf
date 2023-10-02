@@ -114,11 +114,11 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
       if (!DimensionInfo.EMPTY.equals(dimImage)) {
         if (nbImagesInPage.getAndIncrement() == 0) {
           // Only record the first dimension in a page
-        imageDimensions.add(dimImage);
+          imageDimensions.add(dimImage);
+        }
       }
-    }
-    return true;
-  } );
+      return true;
+    });
     return nbImagesInPage.get();
   }
 }

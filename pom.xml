@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>fr.bnf.digitools</groupId>
   <artifactId>scannedPdf</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>1.1</version>
   <name>scannedPdf</name>
   <description>Little experiment to detect scanned vs native pdfs</description>
   <url>https://github.com/tledoux/scannedPdf</url>
@@ -34,6 +33,14 @@
       <artifactId>pdfbox</artifactId>
       <version>2.0.25</version>
     </dependency>
+    <!-- Required by PDFBox to generate tiff images -->
+    <!--
+    <dependency>
+      <groupId>javax.media</groupId>
+      <artifactId>jai_imageio</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+    -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -59,7 +66,7 @@
                 <requireMavenVersion>
                   <version>3.2.5</version>
                 </requireMavenVersion>
-              </rules>    
+              </rules>
             </configuration>
           </execution>
         </executions>
@@ -175,4 +182,13 @@
       </plugin>
     </plugins>
   </reporting>
+  <!--
+  <repositories>
+    <repository>
+      <id>Geotoolkit</id>
+      <name>Geotoolkit</name>
+      <url>http://maven.geotoolkit.org/</url>
+    </repository>
+  </repositories>
+  -->
 </project>
