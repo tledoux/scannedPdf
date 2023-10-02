@@ -21,6 +21,8 @@ public abstract class AbstractScanDetector {
   protected static final int THRESHOLD = 2;
   protected static final int MAX_SAMPLES = 10;
 
+  protected List<PDXObject> seenObjects = new ArrayList<>();
+
   /**
    * Method to provide the file descriptor of the file to scan.
    * 
@@ -54,6 +56,12 @@ public abstract class AbstractScanDetector {
         continue;
       }
       PDXObject xobject = resources.getXObject(name);
+      if (seenObjects.contains(xobject)) {
+        // Don't recurse in already seen objects to avoid infinite loop
+        continue;
+      } else {
+        seenObjects.add(xobject);
+      }
       if (xobject instanceof PDFormXObject) {
         PDFormXObject form = (PDFormXObject) xobject;
         PDResources formResources = form.getResources();
@@ -63,7 +71,7 @@ public abstract class AbstractScanDetector {
   }
 
   /**
-   * Find the filter associated with the stream. FLate= Direct, DCT=JPEG, JPX=JPEG2000, CCITT=TIFF
+   * Find the filter associated with the stream. Flate= Direct, DCT=JPEG, JPX=JPEG2000, CCITT=TIFF
    * G3, LZW=compress LZW, RLE=compress RLE, JBIG2
    * 
    * @param stream stream to analyze
@@ -73,14 +81,17 @@ public abstract class AbstractScanDetector {
     COSBase filters = stream.getFilters();
     if (filters instanceof COSName) {
       return ((COSName) filters).getName();
-    } else if (filters instanceof COSArray) {
+    }
+    if (filters instanceof COSArray) {
       COSArray filterArray = (COSArray) filters;
+      List<String> values = new ArrayList<>();
       for (int i = 0; i < filterArray.size(); i++) {
         COSBase base = filterArray.get(i);
         if (base instanceof COSName) {
-          return ((COSName) filters).getName();
+          values.add(((COSName) base).getName());
         }
       }
+      return String.join(",", values);
     }
     return "";
   }

@@ -24,6 +24,6 @@ It's written in Java using the [Apache PDFBox](https://pdfbox.apache.org/) libra
 * Execute the program
 `cd target; java -jar scannedPdf-1.1.jar <YOUR_DIR_WITH_PDFS> ; cd ..`
 * To extract images from a PDF
-`cd target; java -cp scannedPdf-1.1.jar -Djava.util.logging.config.file=../logging.properties fr.bnf.toolslab.ExtractImageApp -dest <DESTINATION_DIRECTORY> <PDF_FILE_TO_EXTRACT>; cd ..
+`cd target; java -cp scannedPdf-1.1.jar -Djava.util.logging.config.file=../logging.properties fr.bnf.toolslab.ExtractImageApp -dest <DESTINATION_DIRECTORY> <PDF_FILE_TO_EXTRACT>; cd ..`
 
 

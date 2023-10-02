@@ -40,6 +40,7 @@ public class ExtractImageApp {
   private File inputFile;
   private File outputDir;
   private boolean keepName = false;
+  private String defaultProducer;
 
   protected void parseArgs(String[] args) throws IllegalArgumentException {
     String dest = ".";
@@ -61,6 +62,10 @@ public class ExtractImageApp {
         keepName = Boolean.parseBoolean(args[index + 1]);
         index += 2;
         LOGGER.fine(String.format("Reading keep %s at %d", keepName, index));
+      } else if ("-producer".equals(args[index])) {
+        defaultProducer = args[index + 1];
+        index += 2;
+        LOGGER.fine(String.format("DEfault producer %s at %d", defaultProducer, index));
       }
       LOGGER.fine(String.format("Parsing %d to %d", index, args.length));
     }
@@ -80,19 +85,18 @@ public class ExtractImageApp {
 
   protected void process() throws IOException {
     if (inputFile.isFile()) {
-      int i = processFile(inputFile, outputDir, keepName);
+      int i = processFile(inputFile, outputDir);
       System.out.println(inputFile.getName() + " process " + i + " images");
     } else if (inputFile.isDirectory()) {
       // Retrieve only the .pdf files
       final PathMatcher pdfMatcher = FileSystems.getDefault().getPathMatcher("glob:*.pdf");
-      final boolean keep = keepName;
       Files.walkFileTree(inputFile.toPath(), new SimpleFileVisitor<Path>() {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
           if (pdfMatcher.matches(file.getFileName())) {
-            int i = processFile(file.toFile(), outputDir, keep);
+            int i = processFile(file.toFile(), outputDir);
             LOGGER.info("DIR " + file.getFileName() + " process " + i + " images");
-            if (!keep) {
+            if (!keepName) {
               int newNum = NUM.get() + i;
               NUM.set(newNum);
             }
@@ -148,7 +152,7 @@ public class ExtractImageApp {
    * @param keepName define if the images should be named after the input file or not
    * @return number of extracted images
    */
-  protected int processFile(File inputFile, File outputDir, boolean keepName) {
+  protected int processFile(File inputFile, File outputDir) {
     LOGGER.info(String.format("ProcessFile %s to %s with %d", inputFile.getName(),
         outputDir.getName(), NUM.get()));
     int nbImages = 0;
@@ -157,6 +161,9 @@ public class ExtractImageApp {
       // String header = document.getVersion();
       LOGGER.info("Find document version " + document.getVersion());
       String producer = info.getProducer();
+      if (producer == null && defaultProducer != null) {
+        producer = defaultProducer;
+      }
       Calendar creationDate = info.getCreationDate();
       if (creationDate == null) {
         creationDate = info.getModificationDate();
