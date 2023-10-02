@@ -15,6 +15,9 @@ import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 
+/**
+ * Abstract class for the different implementation of image detection.
+ */
 public abstract class AbstractScanDetector {
   protected static final Logger LOGGER = Logger.getLogger(AbstractScanDetector.class.getName());
 
@@ -25,21 +28,21 @@ public abstract class AbstractScanDetector {
 
   /**
    * Method to provide the file descriptor of the file to scan.
-   * 
+   *
    * @param fd file descriptor of the file
    */
   abstract void init(FileDescriptor fd);
 
   /**
    * Method to parse the given file.
-   * 
+   *
    * @throws IOException exception if error while reading the file
    */
   abstract void parse() throws IOException;
 
   /**
    * Recursively inspect the resources looking for images.
-   * 
+   *
    * @param resources resources to inspect
    * @param predicate a predicate to call for each image. Return <code>true</code> if recursion
    *        continues.
@@ -73,7 +76,7 @@ public abstract class AbstractScanDetector {
   /**
    * Find the filter associated with the stream. Flate= Direct, DCT=JPEG, JPX=JPEG2000, CCITT=TIFF
    * G3, LZW=compress LZW, RLE=compress RLE, JBIG2
-   * 
+   *
    * @param stream stream to analyze
    * @return name of the filter
    */
@@ -99,7 +102,7 @@ public abstract class AbstractScanDetector {
   /**
    * Lookup the technical metadata of an image WITHOUT reading the image. <b>Don't call
    * resc.getXObject() on a image, access the COSStream directly.</b>
-   * 
+   *
    * @param pdResources the resources of the parent
    * @param name the name of the object
    * @return the dimension of the image
@@ -125,7 +128,7 @@ public abstract class AbstractScanDetector {
 
   /**
    * Select nbSamples pages in a random fashion.
-   * 
+   *
    * @param nbSamples number of samples to collect
    * @param nbPages total number of pages
    * @return a list of selected pages
@@ -144,7 +147,7 @@ public abstract class AbstractScanDetector {
 
   /**
    * Calculate the relative density with the given dimensions.
-   * 
+   *
    * @param dimImage dimension of the image
    * @param dimPage dimension of the page in 72 dpi per userUnit
    * @param userUnit potential multiplier of 72 dpi

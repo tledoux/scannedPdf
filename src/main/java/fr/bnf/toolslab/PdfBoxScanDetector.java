@@ -10,6 +10,9 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
+/**
+ * Class to detect images from PDF file.
+ */
 public class PdfBoxScanDetector extends AbstractScanDetector {
   protected static final Logger LOGGER = Logger.getLogger(PdfBoxScanDetector.class.getName());
 
@@ -74,7 +77,7 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 
   /**
    * Count the number of images in the PDF document.
-   * 
+   *
    * @param document PDF document to scan
    * @return number of found images
    * @throws IOException exception if error while reading the file
@@ -95,7 +98,7 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
 
   /**
    * Look if there is an image that covers all the page.
-   * 
+   *
    * @param page PDF page to evaluate
    */
   private int isScanPage(PDPage page) throws IOException {

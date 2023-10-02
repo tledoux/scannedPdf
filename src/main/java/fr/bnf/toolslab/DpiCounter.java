@@ -18,7 +18,7 @@ public class DpiCounter {
 
   /**
    * Get the nearest ten.
-   * 
+   *
    * @param value value to round
    * @return rounded value
    */
@@ -37,7 +37,7 @@ public class DpiCounter {
 
   /**
    * Return the most usual dpi.
-   * 
+   *
    * @return Entry containing the most usual dpi and the number of occurrences
    */
   public Entry<Integer, Integer> getBest() {

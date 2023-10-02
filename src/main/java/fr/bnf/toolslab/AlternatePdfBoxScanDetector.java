@@ -11,6 +11,9 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
+/**
+ * Class to use an altrnate method to detect images in PDF file.
+ */
 public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
   protected static final Logger LOGGER = Logger.getLogger(AlternatePdfBoxScanDetector.class
       .getName());
@@ -106,7 +109,7 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
     DimensionInfo dimPage = new DimensionInfo((long) (rect.getWidth()), (long) (rect.getHeight()));
     LOGGER.fine("Found page [" + numPage + "] with dimension " + dimPage.toString());
     pageDimensions.add(dimPage);
-    // Then lookup for all he images (either direct or in forms)
+    // Then lookup for all the images (either direct or in forms)
     AtomicInteger nbImagesInPage = new AtomicInteger(0);
     PDResources resources = page.getResources();
 

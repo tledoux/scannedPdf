@@ -41,6 +41,13 @@
       <version>1.1.1</version>
     </dependency>
     -->
+    <!-- In order to annotate the spotbugs report -->
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>4.7.3</version>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -121,26 +128,26 @@
           </archive>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.11.0</version>
+      </plugin>
     </plugins>
   </build>
   <reporting>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <version>3.4</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.8</version>
+        <version>3.2.1</version>
         <reportSets>
           <reportSet>
             <reports>
               <report>index</report>
-              <report>license</report>
+              <report>licenses</report>
               <report>scm</report>
-              <report>issue-tracking</report>
+              <report>issue-management</report>
             </reports>
           </reportSet>
         </reportSets>
@@ -148,7 +155,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>3.3.0</version>
         <configuration>
           <configLocation>google_checks.xml</configLocation>
         </configuration>
@@ -161,9 +168,9 @@
         </reportSets>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>3.0.5</version>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>4.7.3.6</version>
         <configuration>
           <argLine>-Xmx256m</argLine>
           <argLine>-XX:MaxPermSize=256m</argLine>
@@ -175,7 +182,7 @@
         <reportSets>
           <reportSet>
             <reports>
-              <report>findbugs</report>
+              <report>spotbugs</report>
             </reports>
           </reportSet>
         </reportSets>

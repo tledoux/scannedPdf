@@ -8,7 +8,6 @@ import java.util.Calendar;
 
 /**
  * Abstract class for all the extractors.
- *
  */
 public abstract class Extractor {
 
@@ -26,6 +25,7 @@ public abstract class Extractor {
 
   /**
    * Define additional parameters if encounter.
+   *
    * @param producer producer of the image
    * @param creationDate creation date of the image
    */
@@ -33,6 +33,7 @@ public abstract class Extractor {
 
   /**
    * Extract the image to the file.
+   *
    * @param outputFile file to write to
    * @return success or not
    */

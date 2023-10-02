@@ -2,8 +2,13 @@ package fr.bnf.toolslab;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * Class to store information on a PDF file.
+ */
 public class FileDescriptor {
   protected static final String SEP = ";";
 
@@ -41,7 +46,7 @@ public class FileDescriptor {
 
   /**
    * Boolean to know if the file is valid.
-   * 
+   *
    * @return isValid validity of the file
    */
   public boolean isValid() {
@@ -50,7 +55,7 @@ public class FileDescriptor {
 
   /**
    * Setter for the validity of the file.
-   * 
+   *
    * @param isValid boolean to set
    */
   public void setValid(boolean isValid) {
@@ -68,7 +73,7 @@ public class FileDescriptor {
 
   /**
    * Setter for the number of pages.
-   * 
+   *
    * @param nbPages page counter
    */
   public void setNbPages(int nbPages) {
@@ -86,7 +91,7 @@ public class FileDescriptor {
 
   /**
    * Setter for the number of pages.
-   * 
+   *
    * @param nbImages image counter
    */
   public void setNbImages(int nbImages) {
@@ -95,7 +100,7 @@ public class FileDescriptor {
 
   /**
    * Boolean to know if the document is scan-based.
-   * 
+   *
    * @return isScan boolean to indicate if it's a scanned PDF
    */
   public boolean isScan() {
@@ -104,7 +109,7 @@ public class FileDescriptor {
 
   /**
    * Setter for the scanned indicator.
-   * 
+   *
    * @param isScan boolean to indicate whether it's a scanned PDF
    */
   public void setScan(boolean isScan) {
@@ -113,7 +118,7 @@ public class FileDescriptor {
 
   /**
    * Getter for the resolution of the scan.
-   * 
+   *
    * @return resolution in DPI
    */
   public int getResolution() {
@@ -122,7 +127,7 @@ public class FileDescriptor {
 
   /**
    * Setter for the resolution.
-   * 
+   *
    * @param resolution the resolution to set
    */
   public void setResolution(int resolution) {
@@ -140,22 +145,24 @@ public class FileDescriptor {
 
   /**
    * Setter for the time of processing.
-   * 
+   *
    * @param timeToProcess the timeToProcess to set
    */
   public void setTimeToProcess(long timeToProcess) {
     this.timeToProcess = timeToProcess;
   }
 
+  protected static final List<String> HEADERS =
+      Collections.unmodifiableList(Arrays.asList("FILENAME", "PROCESSING TIME", "VALID", "NB PAGES",
+          "NB IMAGES", "TYPE", "RESOLUTION"));
+
   /**
    * Get a header for a list of file descriptions.
-   * 
+   *
    * @return string to display
    */
   public static String headString() {
-    final String[] headers =
-        {"FILENAME", "PROCESSING TIME", "VALID", "NB PAGES", "NB IMAGES", "TYPE", "RESOLUTION"};
-    return String.join(SEP, headers);
+    return String.join(SEP, HEADERS);
   }
 
   @Override

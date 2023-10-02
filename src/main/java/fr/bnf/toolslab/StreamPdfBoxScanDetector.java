@@ -13,6 +13,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
+/**
+ * Class to detect images by streaming the PDF file.
+ */
 public class StreamPdfBoxScanDetector extends AbstractScanDetector {
   protected static final Logger LOGGER = Logger.getLogger(StreamPdfBoxScanDetector.class.getName());
 

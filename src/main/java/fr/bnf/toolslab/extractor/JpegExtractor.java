@@ -1,5 +1,6 @@
 package fr.bnf.toolslab.extractor;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,11 +29,12 @@ public class JpegExtractor extends Extractor {
 
   /**
    * Constructor.
-   * 
+   *
    * @param image image to extract
    * @param dpiX resolution in X
    * @param dpiY resolution in Y
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Encapsulate PDImage")
   public JpegExtractor(PDImageXObject image, int dpiX, int dpiY) {
     this.image = image;
     this.dpiX = dpiX;

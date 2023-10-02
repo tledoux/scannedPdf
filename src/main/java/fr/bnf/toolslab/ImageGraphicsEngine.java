@@ -175,7 +175,7 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
 
   /**
    * Getter for the imageCounter.
-   * 
+   *
    * @return the imageCounter
    */
   public AtomicInteger getImageCounter() {
@@ -184,7 +184,7 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
 
   /**
    * Getter for all the image dimensions.
-   * 
+   *
    * @return the imageDimensions
    */
   public List<DimensionInfo> getImageDimensions() {

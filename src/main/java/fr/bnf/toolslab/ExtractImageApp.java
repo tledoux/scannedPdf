@@ -1,5 +1,11 @@
 package fr.bnf.toolslab;
 
+import fr.bnf.toolslab.extractor.Extractor;
+import fr.bnf.toolslab.extractor.Jpeg2000Extractor;
+import fr.bnf.toolslab.extractor.JpegExtractor;
+import fr.bnf.toolslab.extractor.TiffColorExtractor;
+import fr.bnf.toolslab.extractor.TiffG4Extractor;
+import fr.bnf.toolslab.extractor.TiffGreyExtractor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -14,12 +20,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import fr.bnf.toolslab.extractor.Extractor;
-import fr.bnf.toolslab.extractor.Jpeg2000Extractor;
-import fr.bnf.toolslab.extractor.JpegExtractor;
-import fr.bnf.toolslab.extractor.TiffColorExtractor;
-import fr.bnf.toolslab.extractor.TiffG4Extractor;
-import fr.bnf.toolslab.extractor.TiffGreyExtractor;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -45,7 +45,12 @@ public class ExtractImageApp {
   protected void parseArgs(String[] args) throws IllegalArgumentException {
     String dest = ".";
     int index = 0;
+    int previousIndex = -1;
     while (index < args.length - 1) {
+      if (previousIndex == index) {
+        throw new IllegalArgumentException("Problem with arguments list !!!");
+      }
+      previousIndex = index;
       if ("-log".equals(args[index])) { // Doesn't work, too late
         String logfile = args[index + 1];
         System.setProperty("java.util.logging.config.file", logfile);
@@ -70,8 +75,10 @@ public class ExtractImageApp {
       LOGGER.fine(String.format("Parsing %d to %d", index, args.length));
     }
     outputDir = new File(dest);
-    if (!outputDir.mkdirs()) {
-      LOGGER.warning("Problem creating dir " + outputDir.getAbsolutePath());
+    try {
+      Files.createDirectories(outputDir.toPath());
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Problem creating " + dest + ": " + e.getMessage());
     }
     inputFile = new File(args[index]);
     LOGGER.info(String.format("Input file %s", inputFile.getName()));
@@ -118,7 +125,8 @@ public class ExtractImageApp {
     if (filters.contains(COSName.JPX_DECODE)) {
       return new Jpeg2000Extractor(image);
     }
-    if (filters.contains(COSName.FLATE_DECODE) || filters.contains(COSName.LZW_DECODE)) {
+    if (filters.contains(COSName.FLATE_DECODE) || filters.contains(COSName.LZW_DECODE)
+        || filters.contains(COSName.RUN_LENGTH_DECODE)) {
       PDColorSpace cspace = null;
       try {
         cspace = image.getColorSpace();
@@ -146,7 +154,7 @@ public class ExtractImageApp {
 
   /**
    * Extract the images of a given PDF file.
-   * 
+   *
    * @param inputFile pdf file to read from
    * @param outputDir directory to save the images
    * @param keepName define if the images should be named after the input file or not
@@ -188,11 +196,19 @@ public class ExtractImageApp {
             if (extension.equals("png")) {
               extension = "tiff"; // extract uncompressed TIFF instead of png
             }
-            String outName = String.format("image_%03d.%s", NUM.get() + nbImages, extension);
+            String outPrefix = "image";
             if (keepName) {
-              outName =
-                  String.format("%s_%03d.%s", inputFile.getName(), NUM.get() + nbImages, extension);
+              String inputName = inputFile.getName();
+              int idxLastPoint = inputName.lastIndexOf('.');
+              if (idxLastPoint == -1) {
+                outPrefix = inputName;
+              } else {
+                outPrefix = inputName.substring(0, idxLastPoint);
+              }
             }
+            String outName =
+                String.format("%s_%03d.%s", outPrefix, NUM.get() + nbImages, extension);
+
             File outfile = new File(outputDir, outName);
 
             int width = image.getWidth();
@@ -231,7 +247,7 @@ public class ExtractImageApp {
 
   /**
    * Main method.
-   * 
+   *
    * @param args arguments given in the command line
    * @throws IOException exception if error while accessing the files
    */

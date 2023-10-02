@@ -19,7 +19,7 @@ public class TiffColorExtractor extends TiffExtractor {
 
   /**
    * Constructor.
-   * 
+   *
    * @param image image to extract
    * @param dpiX resolution in X
    * @param dpiY resolution in Y
@@ -30,7 +30,7 @@ public class TiffColorExtractor extends TiffExtractor {
 
   /**
    * Extract the image to the file.
-   * 
+   *
    * @param outputFile file to write to
    * @return success or not
    */
@@ -62,7 +62,7 @@ public class TiffColorExtractor extends TiffExtractor {
       addField(IMAGEWIDTH, TIFF_TYPE_LONG, 1, width);
       addField(IMAGELENGTH, TIFF_TYPE_LONG, 1, height);
       idxBitsPerSample = addField(BITSPERSAMPLE, TIFF_TYPE_SHORT, numOfComponents, DUMMY_VALUE);
-      addField(COMPRESSION, TIFF_TYPE_SHORT, 1, 1);// NoCompression=1
+      addField(COMPRESSION, TIFF_TYPE_SHORT, 1, 1); // NoCompression=1
       addField(PHOTOMETRICINTERPRETATION, TIFF_TYPE_SHORT, 1, 2);
       // For each strip, the byte offset of that strip
       idxStripOffset = addField(STRIPOFFSETS, TIFF_TYPE_LONG, 1, DUMMY_LENGTH);
@@ -87,7 +87,7 @@ public class TiffColorExtractor extends TiffExtractor {
       // HUGE memory hole
       byte[] fullData = stream.toByteArray();
       long totalLength = fullData.length;
-      setField(idxStripByteCounts, (int)totalLength);
+      setField(idxStripByteCounts, (int) totalLength);
 
       int lenHeader = getPosition();
       setField(idxStripOffset, lenHeader);

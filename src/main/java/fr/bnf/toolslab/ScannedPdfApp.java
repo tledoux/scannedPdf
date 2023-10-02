@@ -22,7 +22,7 @@ public class ScannedPdfApp {
 
   /**
    * Main method.
-   * 
+   *
    * @param args arguments given in the command line
    * @throws IOException exception if error while accessing the files
    */
@@ -77,6 +77,7 @@ public class ScannedPdfApp {
 
   /**
    * Process a given file.
+   *
    * @param inputFile file to process
    * @param detector detector to use
    * @return the description of the file

@@ -1,5 +1,6 @@
 package fr.bnf.toolslab.extractor;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -122,11 +123,12 @@ public abstract class TiffExtractor extends Extractor {
 
   /**
    * Constructor for an abstract TiffExtractor.
-   * 
+   *
    * @param image image to extract
    * @param dpiX resolution in X
    * @param dpiY resolution in Y
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Encapsulate PDImage")
   public TiffExtractor(PDImageXObject image, int dpiX, int dpiY) {
     this.image = image;
     this.dpiX = dpiX;
@@ -179,7 +181,7 @@ public abstract class TiffExtractor extends Extractor {
 
   /**
    * Add an field in the IFD.
-   * 
+   *
    * @param tag value of the tiff tag
    * @param type tiff type
    * @param count number of repetition

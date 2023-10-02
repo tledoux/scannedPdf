@@ -30,7 +30,6 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
  * A wrapper around a image. The buffer is not decoded.
  */
 public class PDImageWrap extends PDXObject implements PDImage {
-
   /**
    * Log instance.
    */
@@ -39,7 +38,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
   private PDColorSpace colorSpace;
 
   /**
-   * current resource dictionary (has color spaces).
+   * Current resource dictionary (has color spaces).
    */
   private final PDResources resources;
 
@@ -59,7 +58,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
 
   /**
    * Returns the metadata associated with this XObject, or null if there is none.
-   * 
+   *
    * @return the metadata associated with this object.
    */
   public PDMetadata getMetadata() {
@@ -72,7 +71,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
 
   /**
    * Sets the metadata associated with this XObject, or null if there is none.
-   * 
+   *
    * @param meta the metadata associated with this object
    */
   public void setMetadata(PDMetadata meta) {
@@ -90,7 +89,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
 
   /**
    * Sets the key of this XObject in the structural parent tree.
-   * 
+   *
    * @param key the new key for this XObject
    */
   public void setStructParent(int key) {
@@ -134,7 +133,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
   /**
    * Returns an RGB buffered image containing the opaque image stream without any masks applied. If
    * this Image XObject is a mask then the buffered image will contain the raw mask.
-   * 
+   *
    * @return the image without any masks applied
    * @throws IOException if the image cannot be read
    */
@@ -145,7 +144,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
 
   /**
    * Returns the color key mask array associated with this image, or null if there is none.
-   * 
+   *
    * @return Mask Image XObject
    */
   public COSArray getColorKeyMask() {
@@ -275,7 +274,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
 
   /**
    * This will get the suffix for this image type, e.g. jpg/png.
-   * 
+   *
    * @return The image suffix or null if not available.
    */
   @Override
@@ -313,7 +312,7 @@ public class PDImageWrap extends PDXObject implements PDImage {
 
   /**
    * Sets the optional content group or optional content membership dictionary.
-   * 
+   *
    * @param oc The optional content group or optional content membership dictionary.
    */
   public void setOptionalContent(PDPropertyList oc) {

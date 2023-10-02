@@ -1,20 +1,15 @@
 package fr.bnf.toolslab.extractor;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Logger;
-import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.common.PDStream;
-import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 /**
@@ -25,6 +20,7 @@ public class Jpeg2000Extractor extends Extractor {
 
   protected PDImageXObject image;
 
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Encapsulate PDImage")
   public Jpeg2000Extractor(PDImageXObject image) {
     this.image = image;
   }

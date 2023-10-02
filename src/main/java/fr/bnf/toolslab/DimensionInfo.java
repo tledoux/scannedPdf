@@ -18,7 +18,7 @@ public class DimensionInfo {
 
   /**
    * Looks if two dimensions are almost equals (by the given percent).
-   * 
+   *
    * @param otherDim the other dimension to compare with
    * @param percent tolerance of approximation
    * @return @true@ if dimensions almost equals
@@ -31,7 +31,7 @@ public class DimensionInfo {
 
   /**
    * Looks if the give dimension is smaller.
-   * 
+   *
    * @param otherDim the other dimension to compare with
    * @return @true@ if the given dimension is contained in
    */

@@ -18,7 +18,7 @@ public class TiffGreyExtractor extends TiffExtractor {
 
   /**
    * Constructor.
-   * 
+   *
    * @param image image to extract
    * @param dpiX resolution in X
    * @param dpiY resolution in Y
@@ -29,7 +29,7 @@ public class TiffGreyExtractor extends TiffExtractor {
 
   /**
    * Extract the image to the file.
-   * 
+   *
    * @param outputFile file to write to
    * @return success or not
    */
@@ -61,7 +61,7 @@ public class TiffGreyExtractor extends TiffExtractor {
       addField(IMAGEWIDTH, TIFF_TYPE_LONG, 1, width);
       addField(IMAGELENGTH, TIFF_TYPE_LONG, 1, height);
       addField(BITSPERSAMPLE, TIFF_TYPE_SHORT, 1, bitsPerComponent);
-      addField(COMPRESSION, TIFF_TYPE_SHORT, 1, 1);// NoCompression=1
+      addField(COMPRESSION, TIFF_TYPE_SHORT, 1, 1); // NoCompression=1
       addField(PHOTOMETRICINTERPRETATION, TIFF_TYPE_SHORT, 1, 0); // TODO or 1
       // For each strip, the byte offset of that strip
       idxStripOffset = addField(STRIPOFFSETS, TIFF_TYPE_LONG, 1, DUMMY_LENGTH);
@@ -81,8 +81,8 @@ public class TiffGreyExtractor extends TiffExtractor {
       // HUGE memory hole
       byte[] fullData = stream.toByteArray();
       long totalLength = fullData.length;
-      setField(idxStripByteCounts, (int)totalLength);
-      
+      setField(idxStripByteCounts, (int) totalLength);
+
       int lenHeader = getPosition();
       setField(idxStripOffset, lenHeader);
       fos.write(headerBuffer.array(), 0, lenHeader);

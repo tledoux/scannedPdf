@@ -1,5 +1,6 @@
 package fr.bnf.toolslab.extractor;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,7 +21,7 @@ public class TiffG4Extractor extends TiffExtractor {
 
   /**
    * Constructor.
-   * 
+   *
    * @param image image to extract
    * @param dpiX resolution in X
    * @param dpiY resolution in Y
@@ -31,6 +32,7 @@ public class TiffG4Extractor extends TiffExtractor {
 
   /**
    * Extract the image to the file.
+   *
    * @param outputFile file to write to
    * @return success or not
    */
@@ -55,14 +57,7 @@ public class TiffG4Extractor extends TiffExtractor {
     }
     LOGGER.info(String.format("Image size (%d x %d) with factorK %d, blackIs1 %d", width, height,
         factorK, blackIs1 ? 1 : 0));
-    int compression = 1;
-    if (factorK < 0) { // Pure 2-dimensional encoding (Group 4)
-      compression = 4; // CCITT G4
-    } else if (factorK == 0) { // Pure 1-dimensional encoding (Group 3, 1D)
-      compression = 3; // Group 3 1D
-    } else { // Mixed 1 and 2-dimensional encoding (Group 3, 2D)
-      compression = 3; // Group 3 2D
-    }
+    int compression = calculateCompression(factorK);
     int photometricInterpretation = blackIs1 ? 1 : 0;
 
     List<String> stopFilters = Arrays.asList("CCITTFaxDecode"); // keep G4 compression
@@ -107,5 +102,25 @@ public class TiffG4Extractor extends TiffExtractor {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Infer compression value given the K parameter.
+   *
+   * @param factorK K parameter of the parameter
+   * @return compression value
+   */
+  @SuppressFBWarnings(value = "DB_DUPLICATE_BRANCHES",
+      justification = "Duplication is intended to facilitate the reading")
+  private int calculateCompression(int factorK) {
+    int compression = 1;
+    if (factorK < 0) { // Pure 2-dimensional encoding (Group 4)
+      compression = 4; // CCITT G4
+    } else if (factorK == 0) { // Pure 1-dimensional encoding (Group 3, 1D)
+      compression = 3; // Group 3 1D
+    } else { // Mixed 1 and 2-dimensional encoding (Group 3, 2D)
+      compression = 3; // Group 3 2D
+    }
+    return compression;
   }
 }
