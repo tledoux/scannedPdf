@@ -22,6 +22,7 @@ public class Jpeg2000Extractor extends Extractor {
 
   @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Encapsulate PDImage")
   public Jpeg2000Extractor(PDImageXObject image) {
+    LOGGER.fine("Using Jpeg2000Extractor");
     this.image = image;
   }
 
@@ -41,9 +42,7 @@ public class Jpeg2000Extractor extends Extractor {
     try (InputStream is = image.createInputStream(stopFilters);
         FileOutputStream fos = new FileOutputStream(outputFile)) {
 
-      // No header !!!
-
-      // Then copy the stream
+      // Direct copy of the stream
       long totalLength = transfer(is, fos);
       LOGGER.info(String.format("Data length %d", totalLength));
     } catch (IOException e) {

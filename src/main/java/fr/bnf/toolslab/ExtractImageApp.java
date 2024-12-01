@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -116,6 +117,15 @@ public class ExtractImageApp {
 
   protected Extractor findExtractor(PDImageXObject image, int dpiX, int dpiY) {
     List<COSName> filters = image.getStream().getFilters();
+
+    if (LOGGER.isLoggable(Level.FINE)) {
+      List<String> allfilters = new ArrayList<>();
+      for (COSName name : filters) {
+        allfilters.add(name.getName());
+      }
+      LOGGER.fine(String.format("Finding extractor for image type %s with filters (%s)",
+          image.getSuffix(), String.join(",", allfilters)));
+    }
     if (filters.contains(COSName.CCITTFAX_DECODE)) {
       return new TiffG4Extractor(image, dpiX, dpiY);
     }
@@ -142,12 +152,14 @@ public class ExtractImageApp {
         return new TiffColorExtractor(image, dpiX, dpiY);
       }
     }
-    List<String> allfilters = new ArrayList<>();
-    for (COSName name : filters) {
-      allfilters.add(name.getName());
+    if (LOGGER.isLoggable(Level.WARNING)) {
+      List<String> allfilters = new ArrayList<>();
+      for (COSName name : filters) {
+        allfilters.add(name.getName());
+      }
+      LOGGER.warning(String.format("Impossible to process image type %s with filters (%s)",
+          image.getSuffix(), String.join(",", allfilters)));
     }
-    LOGGER.warning(String.format("Impossible to process image type %s with filters (%s)",
-        image.getSuffix(), String.join(",", allfilters)));
     return null;
 
   }

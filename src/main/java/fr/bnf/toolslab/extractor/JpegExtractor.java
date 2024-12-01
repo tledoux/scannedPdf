@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
+import org.apache.pdfbox.pdmodel.graphics.color.PDICCBased;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 /**
@@ -36,6 +37,7 @@ public class JpegExtractor extends Extractor {
    */
   @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Encapsulate PDImage")
   public JpegExtractor(PDImageXObject image, int dpiX, int dpiY) {
+    LOGGER.fine("Using JpegExtractor with " + dpiX + " DPI");
     this.image = image;
     this.dpiX = dpiX;
     this.dpiY = dpiY;
@@ -84,7 +86,6 @@ public class JpegExtractor extends Extractor {
       return false;
     }
     LOGGER.info("Found colorSpace " + cspace);
-
 
     List<String> stopFilters = Arrays.asList("DCTDecode"); // keep DCT
     try (InputStream is = image.createInputStream(stopFilters);

@@ -15,8 +15,8 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
  * Class to use an altrnate method to detect images in PDF file.
  */
 public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
-  protected static final Logger LOGGER = Logger.getLogger(AlternatePdfBoxScanDetector.class
-      .getName());
+  protected static final Logger LOGGER =
+      Logger.getLogger(AlternatePdfBoxScanDetector.class.getName());
 
   FileDescriptor fd;
   AtomicInteger nbPages;
@@ -122,6 +122,10 @@ public class AlternatePdfBoxScanDetector extends AbstractScanDetector {
       }
       return true;
     });
+    // In case there is no image in the page
+    if (nbImagesInPage.get() == 0) {
+      imageDimensions.add(DimensionInfo.EMPTY);
+    }
     return nbImagesInPage.get();
   }
 }
