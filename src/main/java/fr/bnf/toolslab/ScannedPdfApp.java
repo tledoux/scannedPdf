@@ -29,6 +29,7 @@ public class ScannedPdfApp {
   public static void main(String[] args) throws IOException {
     boolean useAlternate = false;
     boolean useStream = false;
+    boolean useStrict = false;
     if (args.length < 1) {
       usage();
       return;
@@ -41,6 +42,10 @@ public class ScannedPdfApp {
       useStream = true;
       index++;
     }
+    else if ("-strict".equals(args[0])) {
+      useStrict = true;
+      index++;
+    }
 
     File inputFile = new File(args[index]);
     if (!inputFile.exists()) {
@@ -51,7 +56,8 @@ public class ScannedPdfApp {
 
     final AbstractScanDetector detector =
         useAlternate ? new AlternatePdfBoxScanDetector()
-            : (useStream ? new StreamPdfBoxScanDetector() : new PdfBoxScanDetector());
+            : (useStream ? new StreamPdfBoxScanDetector()
+                : (useStrict ? new StrictPdfBoxScanDetector() : new PdfBoxScanDetector()));
 
     if (inputFile.isFile()) {
       FileDescriptor fd = processFile(inputFile, detector);
