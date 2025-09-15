@@ -1,5 +1,6 @@
 package fr.bnf.toolslab;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -158,6 +159,15 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
       }
       return nbImagesInPage;
+    }
+
+    public static boolean isScan(File file, int samples) throws IOException {
+      FileDescriptor fileDescriptor = new FileDescriptor(file);
+
+      StrictPdfBoxScanDetector strictPdfBoxScanDetector = new StrictPdfBoxScanDetector(samples);
+      strictPdfBoxScanDetector.init(fileDescriptor);
+      strictPdfBoxScanDetector.parse();
+      return fileDescriptor.isScan();
     }
   }
 
