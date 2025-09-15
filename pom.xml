@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>fr.bnf.digitools</groupId>
-  <artifactId>scannedPdf</artifactId>
+  <groupId>au.gov.nla</groupId>
+  <artifactId>scanned-pdf-detector</artifactId>
   <packaging>jar</packaging>
   <version>1.2</version>
   <name>scannedPdf</name>
@@ -18,11 +18,16 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  <scm>
-    <url>https://github.com/tledoux/scannedPdf</url>
-    <connection>scm:git:git://github.com/tledoux/scannedPdf.git</connection>
-    <developerConnection>scm:git:git@github.com:tledoux/scannedPdf.git</developerConnection>
-  </scm>
+  <distributionManagement>
+    <repository>
+      <id>nla-public-releases</id>
+      <url>https://dev.nla.gov.au/nexus/content/repositories/nla-public/</url>
+    </repository>
+    <snapshotRepository>
+      <id>nla-public-snapshots</id>
+      <url>https://dev.nla.gov.au/nexus/content/repositories/nla-public-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -33,18 +38,6 @@
       <artifactId>pdfbox</artifactId>
       <version>2.0.29</version>
     </dependency>
-    <!-- Required by PDFBox to read JPEG2000 images -->
-    <dependency>
-      <groupId>com.github.jai-imageio</groupId>
-      <artifactId>jai-imageio-core</artifactId>
-      <version>1.4.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.jai-imageio</groupId>
-      <artifactId>jai-imageio-jpeg2000</artifactId>
-      <version>1.4.0</version>
-    </dependency>
-    
     <!-- In order to annotate the spotbugs report -->
     <dependency>
       <groupId>com.github.spotbugs</groupId>
