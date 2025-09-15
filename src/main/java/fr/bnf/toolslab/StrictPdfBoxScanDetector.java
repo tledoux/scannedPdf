@@ -66,7 +66,6 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
           fd.setScan(false);
           return;
         }
-        assert (pageDimensions.size() == imageDimensions.size());
 
         // Second heuristic: pick some pages and look if the image covers
         // all the page
