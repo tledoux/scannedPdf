@@ -51,7 +51,12 @@ public class ImageGraphicsEngine extends PDFGraphicsStreamEngine { // TODO try P
 
   void run() throws IOException {
     PDPage page = getPage();
+    try {
     processPage(page);
+    } catch (NullPointerException e) {
+      // Occasionally PDFBox fails with an NPE. Ignore it and keep on going.
+      LOGGER.fine("Error processing page " + page.getCOSObject() + ": " + e.getMessage());
+    }
     PDResources res = page.getResources();
     if (res == null) {
       return;
