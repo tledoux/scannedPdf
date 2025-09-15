@@ -28,6 +28,15 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
     List<DimensionInfo> imageDimensions;
     private Map<COSStream, Integer> processedInlineImages = new HashMap<>();
     private AtomicInteger inlineImageCounter = new AtomicInteger(0);
+    private final int numSamples; // Number of pages to sample
+
+    public StrictPdfBoxScanDetector(int numSamples) {
+      this.numSamples = numSamples;
+    }
+
+    public StrictPdfBoxScanDetector() {
+      this(MAX_SAMPLES); // Default to 5 samples
+    }
 
     @Override
     public void init(FileDescriptor fd) {
@@ -67,15 +76,14 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
           return;
         }
 
-        // Second heuristic: pick some pages and look if the image covers
+        // Second heuristic: pick the first x pages and look if the image covers
         // all the page
-        int nbSamples = Math.min(nbPages, MAX_SAMPLES);
-        List<Integer> pagesToTest = pickSamples(nbSamples, nbPages);
+        int nbSamples = Math.min(nbPages, numSamples);
 
         // Classify all the dpiFound (could be 0)
         DpiCounter counter = new DpiCounter();
 
-        for (int pageNum : pagesToTest) {
+        for (int pageNum = 0; pageNum < nbSamples; pageNum++) {
           DimensionInfo dimPage = pageDimensions.get(pageNum);
           DimensionInfo dimImage = imageDimensions.get(pageNum);
           LOGGER.fine("Page [" + pageNum + "] dimension " + dimImage);

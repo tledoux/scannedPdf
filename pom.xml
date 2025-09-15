@@ -35,9 +35,14 @@
     </dependency>
     <!-- Required by PDFBox to read JPEG2000 images -->
     <dependency>
-      <groupId>javax.media</groupId>
-      <artifactId>jai_imageio</artifactId>
-      <version>1.1.1</version>
+      <groupId>com.github.jai-imageio</groupId>
+      <artifactId>jai-imageio-core</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jai-imageio</groupId>
+      <artifactId>jai-imageio-jpeg2000</artifactId>
+      <version>1.4.0</version>
     </dependency>
     
     <!-- In order to annotate the spotbugs report -->
@@ -188,13 +193,5 @@
       </plugin>
     </plugins>
   </reporting>
-  
-  <repositories>
-    <repository>
-      <id>Geotoolkit</id>
-      <name>Geotoolkit</name>
-      <url>http://maven.geotoolkit.org/</url>
-    </repository>
-  </repositories>
  
 </project>
