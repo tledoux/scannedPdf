@@ -112,6 +112,9 @@ public class PdfBoxScanDetector extends AbstractScanDetector {
     AtomicInteger density = new AtomicInteger(0);
     // Enumerate the resources to avoid building a complete image
     PDResources resources = page.getResources();
+    // Since we're recursing over the list of images again, we need to clear 'seen objects' or we
+    // won't find nested images.
+    seenObjects.clear();
     recurseForImages(resources, dimImage -> {
       if (!DimensionInfo.EMPTY.equals(dimImage)) {
         density.set(findDensity(dimImage, dimPage, userUnit));
